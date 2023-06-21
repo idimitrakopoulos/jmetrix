@@ -20,6 +20,15 @@ def jira_authenticate(url, u, p):
         raise
     return j
 
+def jira_token_authenticate(url, t):
+    try:
+        log.debug("Attempting to authenticate to '" + url + "' (token: '" + t)
+        j = JIRA(server=url, token_auth=t)
+        log.debug("Successful authentication!")
+    except:
+        log.error("Error when trying to authenticate to '" + url + "' (token: '" + t)
+        raise
+    return j
 
 def run_jql(jira, jql, max=False, debug=False):
     if debug:
@@ -155,10 +164,10 @@ def count_field_values(field_name, changelog):
             if item.field == field_name:
                 reasons = [x.strip() for x in item.toString.split(',')]
                 for r in reasons:
-                    if r in result and r is not "":
+                    if r in result and r != "":
                         result[r] += 1
                         # log.debug("{} {} times due to '{}' (Total Transitions: {})".format(field_name, str(result[r]), r, sum(result.values())))
-                    elif r not in result and r is not "":
+                    elif r not in result and r != "":
                         result[r] = 1
                         # log.debug("{} 1 time due to '{}' (Total Transitions: {})".format(field_name, r, sum(result.values())))
 
