@@ -22,11 +22,11 @@ def jira_authenticate(url, u, p):
 
 def jira_token_authenticate(url, t):
     try:
-        log.debug("Attempting to authenticate to '" + url + "' (token: '" + t)
+        log.debug("Attempting to authenticate to '" + url + "' (token: ---)")
         j = JIRA(server=url, token_auth=t)
         log.debug("Successful authentication!")
     except:
-        log.error("Error when trying to authenticate to '" + url + "' (token: '" + t)
+        log.error("Error when trying to authenticate to '" + url + "' (token: ---)")
         raise
     return j
 
@@ -300,7 +300,7 @@ def get_time_in_status(status, changelog):
                     out_time = parse(history.created)
                     # log.debug("Found  " + item.toString + " on  " + history.created)
                     result.append(calc_working_seconds(out_time, in_time))
-                    log.debug("get_time_in_status {} = {} sec (working: {} actual: {})".format(status, result[len(result)-1], datetime.timedelta(seconds=result[len(result)-1]), str(in_time-out_time)))
+                    log.debug("get_time_in_status {} = {} sec (effort: {} duration: {})".format(status, result[len(result)-1], datetime.timedelta(seconds=result[len(result)-1]), str(in_time-out_time)))
 
     return result
 

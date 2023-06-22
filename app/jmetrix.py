@@ -31,7 +31,23 @@ if __name__ == '__main__':
         # for history in reversed(issue.changelog.histories):
         #     for item in history.items:
         #         print(item.field)
-        x = sum(get_time_in_status(Status.IN_CODE_REVIEW.value, issue.changelog))
+        sum(get_time_in_status(Status.READY_FOR_ANALYSIS.value, issue.changelog))
+        sum(get_time_in_status(Status.IN_ANALYSIS.value, issue.changelog))
+        sum(get_time_in_status(Status.READY_FOR_UXD.value, issue.changelog))
+        sum(get_time_in_status(Status.IN_UXD.value, issue.changelog))
+        sum(get_time_in_status(Status.READY_FOR_TECH_REVIEW.value, issue.changelog))
+        sum(get_time_in_status(Status.IN_TECH_REVIEW.value, issue.changelog))
+        sum(get_time_in_status(Status.READY_FOR_REFINEMENT.value, issue.changelog))
+        sum(get_time_in_status(Status.IN_REFINEMENT.value, issue.changelog))
+        sum(get_time_in_status(Status.READY_FOR_DELIVERY.value, issue.changelog))
+        sum(get_time_in_status(Status.READY_TO_START.value, issue.changelog))
+        sum(get_time_in_status(Status.IN_PROGRESS.value, issue.changelog))
+        sum(get_time_in_status(Status.READY_FOR_CODE_REVIEW.value, issue.changelog))
+        sum(get_time_in_status(Status.IN_CODE_REVIEW.value, issue.changelog))
+        sum(get_time_in_status(Status.READY_FOR_TESTING.value, issue.changelog))
+        sum(get_time_in_status(Status.IN_TESTING.value, issue.changelog))
+        sum(get_time_in_status(Status.READY_FOR_SIGN_OFF.value, issue.changelog))
+
 
     # # Start up the server to expose the metrics.
     # log.debug("Starting up server at: {}:{}".format(str(wit_bind_address), str(wit_port)))
