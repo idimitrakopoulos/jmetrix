@@ -5,7 +5,7 @@ log = logger.setup_custom_logger('root')
 import os
 from util.jira_obj import PBIMetricCollection, CompositePBIMetricCollection, TPRMetricCollection
 from prometheus_client import start_http_server
-from util.toolkit import jira_token_authenticate
+from util.toolkit import jira_token_authenticate, get_time_in_status
 from util.jql import Status, IssueType, TimeValue
 import ipdb
 import time
@@ -22,6 +22,16 @@ if __name__ == '__main__':
 
     # Connect to Jira instance
     jira = jira_token_authenticate(args.jira_server_url, args.jira_auth_token)
+
+    jql_results = jira.search_issues(args.jira_jql, expand='changelog')
+
+    for issue in jql_results:
+        print('{}: {}'.format(issue.key, issue.fields.summary))
+        # print(dir(issue.changelog))
+        # for history in reversed(issue.changelog.histories):
+        #     for item in history.items:
+        #         print(item.field)
+        print(sum(get_time_in_status(Status.IN_PROGRESS.value, issue.changelog)))
 
     # # Start up the server to expose the metrics.
     # log.debug("Starting up server at: {}:{}".format(str(wit_bind_address), str(wit_port)))
