@@ -184,7 +184,7 @@ def get_time_between_extreme_statuses(from_status, to_status, changelog):
     for history in reversed(changelog.histories):
         for item in history.items:
             if item.field == 'status' and not in_time:
-                if from_status == Status.OPEN.value:
+                if from_status == Status.BACKLOG.value:
                     log.warning("Do NOT use this function for OPEN status as Jira doesnt write the first status as a status change but only as created date")
                     in_time = parse(history.created)
                 elif from_status == item.toString:
@@ -200,9 +200,9 @@ def get_time_between_extreme_statuses(from_status, to_status, changelog):
                         # log.debug("Found {} on {}".format(to_status, str(history.created)))
                         out_time = parse(history.created)
                         result = calc_working_seconds(in_time, out_time)
-                        # log.debug("{} -> {} = {} sec (working: {} actual: {})".format(from_status, to_status, result,
-                        #                                                               datetime.timedelta(seconds=result),
-                        #                                                               str(out_time - in_time)))
+                        log.debug("get_time_between_extreme_statuses {} -> {} = {} sec (workhours: {} duration: {})".format(from_status, to_status, result,
+                                                                                      datetime.timedelta(seconds=result),
+                                                                                      str(out_time - in_time)))
     return result
 
 # @debug
@@ -221,9 +221,7 @@ def get_time_from_creation_to_extreme_status(created, to_status, changelog):
                     out_time = parse(history.created)
                     # log.debug("Found {} on {}".format(to_status, out_time))
                     result = calc_working_seconds(in_time, out_time)
-                    # log.debug("Issue Creation -> {} = {} sec (working: {} actual: {})".format(to_status, result,
-                    #                                                                         datetime.timedelta(seconds=result),
-                    #                                                                         str(out_time - in_time)))
+                    log.debug("get_time_from_creation_to_extreme_status {} = {} sec (workhours: {} duration: {})".format(to_status, result, datetime.timedelta(seconds=result), str(out_time - in_time)))
 
     return result
 
@@ -300,7 +298,7 @@ def get_time_in_status(status, changelog):
                     out_time = parse(history.created)
                     # log.debug("Found  " + item.toString + " on  " + history.created)
                     result.append(calc_working_seconds(out_time, in_time))
-                    log.debug("get_time_in_status {} = {} sec (effort: {} duration: {})".format(status, result[len(result)-1], datetime.timedelta(seconds=result[len(result)-1]), str(in_time-out_time)))
+                    log.debug("get_time_in_status {} = {} sec (workhours: {} duration: {})".format(status, result[len(result)-1], datetime.timedelta(seconds=result[len(result)-1]), str(in_time-out_time)))
 
     return result
 
