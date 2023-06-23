@@ -7,8 +7,6 @@ class StrValueEnum(Enum):
 class IssueType(StrValueEnum):
     STORY = 'Story'
     BUG = 'Bug'
-    DEVELOPMENT_TASK = 'Development Task'
-    THROUGHPUT_REQUEST = 'Throughput Request'
 
 class TimeValue(StrValueEnum):
     MINUS_1_WEEK = '-1w'
@@ -44,8 +42,3 @@ class CustomFieldNames(StrValueEnum):
     REVISION_REASON = 'Revision Reason'
     ORIGIN = 'Origin'
 
-class JQLs(StrValueEnum):
-    JQL_PBI = "project = '{}' AND issuetype = '{}' AND status = '{}' AND resolution = 'Done' AND status changed to '{}' after {}"
-    JQL_TPR = "project = '{}' AND issuetype = '{}' AND status = '{}' AND resolution = 'Done' AND status changed to '{}' after {}"
-    JQL_THROUGHPUT = "project = '{}' AND issuetype = '{}' AND status = '{}' AND resolution = 'Done' AND status changed to '{}' after {}"
-    JQL_CANCELLED = "project = '{}' AND issuetype = '{}' AND status = '{}' AND resolution = 'Cancelled' AND status changed to '{}' after {}"

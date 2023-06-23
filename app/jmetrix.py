@@ -2,13 +2,9 @@
 import util.logger as logger
 import argparse
 log = logger.setup_custom_logger('root')
-import os
-from util.jira_obj import PBIMetricCollection, CompositePBIMetricCollection, TPRMetricCollection
-from prometheus_client import start_http_server
 from util.toolkit import jira_token_authenticate, get_time_in_status, get_time_from_creation_to_extreme_status, get_time_between_extreme_statuses
-from util.jql import Status, IssueType, TimeValue
+from util.jql import Status
 import ipdb, json
-import time
 
 if __name__ == '__main__':
     # Instantiate the parser
@@ -32,10 +28,16 @@ if __name__ == '__main__':
         values = dict()
         issues[issue.key] = values
 
-        issues[issue.key]['issue_key'] = issue.key
+        issues[issue.key]['key'] = issue.key
 
-        issues[issue.key]['t_lead'] = get_time_from_creation_to_extreme_status(issue.fields.created, Status.CLOSED.value, issue.changelog)
-        issues[issue.key]['t_cycle'] = get_time_between_extreme_statuses(Status.READY_TO_START.value, Status.CLOSED.value, issue.changelog)
+        issues[issue.key]['fields'] = dict()
+        issues[issue.key]['fields']['url'] = jira.server_url + "/browse/"+ issue.key
+        issues[issue.key]['fields']['summary'] = issue.fields.summary
+        issues[issue.key]['fields']['status'] = issue.fields.status.name
+
+        issues[issue.key]['aggregates'] = dict()
+        issues[issue.key]['aggregates']['t_lead'] = get_time_from_creation_to_extreme_status(issue.fields.created, Status.CLOSED.value, issue.changelog)
+        issues[issue.key]['aggregates']['t_cycle'] = get_time_between_extreme_statuses(Status.READY_TO_START.value, Status.CLOSED.value, issue.changelog)
 
         issues[issue.key]['t_ready_for_analysis'] = sum(get_time_in_status(Status.READY_FOR_ANALYSIS.value, issue.changelog))
         issues[issue.key]['t_in_analysis'] = sum(get_time_in_status(Status.IN_ANALYSIS.value, issue.changelog))
@@ -56,39 +58,3 @@ if __name__ == '__main__':
 
         log.debug(json.dumps(issues[issue.key], indent=4))
 
-    # # Start up the server to expose the metrics.
-    # log.debug("Starting up server at: {}:{}".format(str(wit_bind_address), str(wit_port)))
-    # start_http_server(wit_port if wit_port != "" else 9000, wit_bind_address if wit_bind_address != "" else "localhost")
-    #
-    # # Stories
-    # story_metrics = PBIMetricCollection(jira, jql_project, IssueType.STORY.value, Status.CLOSED.value, TimeValue.MINUS_1_MONTH.value)
-    # story_metrics.register_prometheus_metrics()
-    #
-    # # Bugs
-    # bug_metrics = PBIMetricCollection(jira, jql_project, IssueType.BUG.value, Status.CLOSED.value, TimeValue.MINUS_1_MONTH.value)
-    # bug_metrics.register_prometheus_metrics()
-    #
-    # # Development Tasks
-    # development_task_metrics = PBIMetricCollection(jira, jql_project, IssueType.DEVELOPMENT_TASK.value, Status.CLOSED.value, TimeValue.MINUS_1_MONTH.value)
-    # development_task_metrics.register_prometheus_metrics()
-    #
-    # # PBIs
-    # pbi_metrics = CompositePBIMetricCollection([story_metrics, bug_metrics, development_task_metrics])
-    # pbi_metrics.register_prometheus_metrics()
-    #
-    # # Throughput Requests
-    # throughput_request_metrics = TPRMetricCollection(jira, jql_project, IssueType.THROUGHPUT_REQUEST.value, Status.CLOSED.value, TimeValue.MINUS_1_MONTH.value)
-    # throughput_request_metrics.register_prometheus_metrics()
-    #
-    #
-    # while True:
-    #     # Sleep before reloading metrics
-    #     time.sleep(wit_update_interval_sec)
-    #     log.debug("Refreshing data from Jira NOW....")
-    #
-    #     # Refresh metrics
-    #     story_metrics.refresh_prometheus_metrics()
-    #     bug_metrics.refresh_prometheus_metrics()
-    #     development_task_metrics.refresh_prometheus_metrics()
-    #     pbi_metrics.refresh_prometheus_metrics()
-    #     throughput_request_metrics.refresh_prometheus_metrics()

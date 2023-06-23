@@ -1,6 +1,6 @@
 import logging
 log = logging.getLogger('root')
-from util.debug_toolkit import debug
+from util.toolkit_debug import debug
 from jira import JIRA
 from dateutil.parser import *
 import datetime
