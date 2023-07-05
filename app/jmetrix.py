@@ -74,3 +74,4 @@ if __name__ == '__main__':
 
         log.debug(json.dumps(issues[issue.key], indent=4))
 
+
