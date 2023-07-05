@@ -130,49 +130,6 @@ def calc_working_seconds(from_date, to_date):
 
     return result
 
-# @debug
-def calc_days_from_now_using_working_hours(working_seconds):
-    result = None
-    # Date NOW
-    from_date = datetime.datetime.now()
-    # log.debug("Date now {}".format(from_date))
-    # Workday
-    workday_hours = 8
-    working_days = int((working_seconds/3600) / workday_hours)
-
-    # log.debug("Working Days {}".format(working_days))
-
-
-    while working_days > 0:
-        from_date += datetime.timedelta(days=1)
-        weekday = from_date.weekday()
-        if weekday >= 5:
-            continue
-        working_days -= 1
-
-    result = from_date.strftime("%Y-%m-%d")
-    # log.debug("result {}".format(result))
-
-    return result
-
-
-# @debug
-def count_field_values(field_name, changelog):
-    result = {}
-    for history in reversed(changelog.histories):
-        for item in history.items:
-            if item.field == field_name:
-                reasons = [x.strip() for x in item.toString.split(',')]
-                for r in reasons:
-                    if r in result and r != "":
-                        result[r] += 1
-                        # log.debug("{} {} times due to '{}' (Total Transitions: {})".format(field_name, str(result[r]), r, sum(result.values())))
-                    elif r not in result and r != "":
-                        result[r] = 1
-                        # log.debug("{} 1 time due to '{}' (Total Transitions: {})".format(field_name, r, sum(result.values())))
-
-
-    return result
 
 # @debug
 def get_time_between_extreme_statuses(from_status, to_status, changelog):
@@ -320,61 +277,6 @@ def get_time_in_initial_status(status, changelog, created):
                 result.extend(get_time_in_status(status, changelog))
                 return result
 
-# @debug
-def retrieve_pbi_data(jira, jql):
-    from util.jira_obj import PBI
-
-    # Run JQL query
-    jql_exec = run_jql(jira, jql, False, True)
-    pbi_list = []
-
-    try:
-        # Skip execution for this JQL if it's empty
-        if len(jql_exec) == 0: raise RuntimeWarning
-
-        # Loop on every issue
-        for issue in jql_exec:
-            log.debug("{} | {} | {}".format(issue, issue.fields.issuetype.name, issue.fields.summary))
-            pbi = PBI(jira.issue(issue.key, expand='changelog'))
-            pbi_list.append(pbi)
-
-    except RuntimeWarning:
-        log.warning('JQL "{}" did not return any issues.'.format(jql))
-
-    except Exception:
-        log.exception("Oops...")
-        # print(traceback.format_exc())
-
-
-    return pbi_list
-
-# @debug
-def retrieve_tpr_data(jira, jql):
-    from util.jira_obj import TPR
-
-    # Run JQL query
-    jql_exec = run_jql(jira, jql, False, True)
-    tpr_list = []
-
-    try:
-        # Skip execution for this JQL if it's empty
-        if len(jql_exec) == 0: raise RuntimeWarning
-
-        # Loop on every issue
-        for issue in jql_exec:
-            log.debug("{} | {} | {}".format(issue, issue.fields.issuetype.name, issue.fields.summary))
-            tpr = TPR(jira.issue(issue.key, expand='changelog'))
-            tpr_list.append(tpr)
-
-    except RuntimeWarning:
-        log.warning('JQL "{}" did not return any issues.'.format(jql))
-
-    except Exception:
-        log.exception("Oops...")
-        # print(traceback.format_exc())
-
-
-    return tpr_list
 
 
 # @debug
@@ -386,42 +288,35 @@ def jql_results_amount(jira, jql):
 def seconds_to_hours(sec):
     return sec/3600
 
-# @debug
-def get_sizing_accuracy(size, seconds_to_compare):
-    result = -1
-    ranges = {'XS' : range(1, 3601),
-              'S' : range(3601, 14401),
-              'M' : range(14401, 57601),
-              'L' : range(57601, 115201),
-              'XL' : range(115201, 144002),}
+def get_class(fully_qualified_path, module_name, class_name, *instantiation):
+    """
+    Returns an instantiated class for the given string descriptors
+    :param fully_qualified_path: The path to the module eg("Utilities.Printer")
+    :param module_name: The module name eg("Printer")
+    :param class_name: The class name eg("ScreenPrinter")
+    :param instantiation: Any fields required to instantiate the class
+    :return: An instance of the class
+    """
+    p = __import__(fully_qualified_path)
+    m = getattr(p, module_name)
+    c = getattr(m, class_name)
+    instance = c(*instantiation)
+    return instance
 
-    if size != 'NB' and seconds_to_compare != 0:
-        if seconds_to_compare in ranges[size]:
-            # log.debug('Seconds {} are within range of {} ({})'.format(seconds_to_compare, size, str(ranges[size])))
-            result = 100
-        elif seconds_to_compare < ranges[size].start:
-            # log.debug('Seconds {} are less than range of {} ({})'.format(seconds_to_compare, size, str(ranges[size])))
-            result = (seconds_to_compare / ranges[size].start) * 100
-        elif seconds_to_compare > ranges[size].stop:
-            # log.debug('Seconds {} are more than range of {} ({})'.format(seconds_to_compare, size, str(ranges[size])))
-            result = (ranges[size].stop / seconds_to_compare) * 100
+def ab_path_to_class(path, p):
+    # pkg.module.ClassName
+    _p_name = path.split(".")[0] + "." + path.split(".")[1]  # pkg.module
+    _m_name = path.split(".")[1]  # module
+    _c_name = path.split(".")[2]  # ClassName
 
-    return result
+    # Instantiate class
+    c = get_class(_p_name, _m_name, _c_name, p)
+    return c
 
-
-def get_unique_keys_from_list_of_dicts(lst):
-    return list(set(key for dic in lst for key in dic.keys()))
-
-
-def switch_string_to_var_name(string):
-    return re.sub('\W+',' ', string).lower().strip().replace(' ', '_')
-
-def retrieve_metric_from_composite_pbi_list(metric_name, cpbis):
-    result = list()
-
-    for cpbi in cpbis:
-        # log.debug("pbi type: {} items: {}".format(cpbi.jira_issuetype, len(cpbi.pbis)))
-        for pbi in cpbi.pbis:
-            result.append(pbi.values[metric_name])
-
-    return result
+def ab_subclass_path_from_action(s):
+    switcher = {
+        'live': "action_bundles.ab_live.ABLive",
+    }
+    ab_path = switcher.get(s, "n/a")
+    log.debug("Action '" + s + "' maps to AB class '" + ab_path + "'")
+    return ab_path
