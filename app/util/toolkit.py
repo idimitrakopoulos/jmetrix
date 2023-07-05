@@ -181,11 +181,11 @@ def get_time_between_extreme_statuses(from_status, to_status, changelog):
     result = 0
     # log.debug("Getting time between first occurrence of {} -> last occurrence of {}".format(from_status, to_status))
     # Search for newest occurrence of needed status
-    for history in reversed(changelog.histories):
+    for history in changelog.histories:
         for item in history.items:
             if item.field == 'status' and not in_time:
                 if from_status == Status.BACKLOG.value:
-                    log.warning("Do NOT use this function for OPEN status as Jira doesnt write the first status as a status change but only as created date")
+                    log.warning("Do NOT use this function for the first status that the ticket gets automatically when it is new as Jira doesnt write the first status as a status change but only as created date")
                     in_time = parse(history.created)
                 elif from_status == item.toString:
                     # log.debug("Found {} on {}".format(from_status, str(history.created)))
@@ -284,7 +284,7 @@ def get_time_in_status(status, changelog):
 
     # log.debug("Getting time for status {}".format(status))
 
-    for history in reversed(changelog.histories):
+    for history in changelog.histories:
         for item in history.items:
             if item.field == 'status':
                 # print(item.toString)
@@ -297,8 +297,8 @@ def get_time_in_status(status, changelog):
                     in_flag = False
                     out_time = parse(history.created)
                     # log.debug("Found  " + item.toString + " on  " + history.created)
-                    result.append(calc_working_seconds(out_time, in_time))
-                    log.debug("get_time_in_status {} = {} sec (workhours: {} duration: {})".format(status, result[len(result)-1], datetime.timedelta(seconds=result[len(result)-1]), str(in_time-out_time)))
+                    result.append(calc_working_seconds(in_time, out_time))
+                    log.debug("get_time_in_status {} = {} sec (workhours: {} duration: {})".format(status, result[len(result)-1], datetime.timedelta(seconds=result[len(result)-1]), str(out_time-in_time)))
 
     return result
 
@@ -309,7 +309,7 @@ def get_time_in_initial_status(status, changelog, created):
 
     # log.debug("Getting time for initial status {} created on {}".format(status, created))
 
-    for history in reversed(changelog.histories):
+    for history in changelog.histories:
         for item in history.items:
             if item.field == 'status':
                 out_time = parse(history.created)
