@@ -9,7 +9,6 @@ from util.toolkit import jira_token_authenticate, get_time_in_status, get_time_f
 args = None
 
 def exec():
-    print(args.ab)
 
     # Connect to Jira instance
     jira = jira_token_authenticate(args.jira_server_url, args.jira_auth_token)
