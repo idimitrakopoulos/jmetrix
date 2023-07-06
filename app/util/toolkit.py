@@ -4,6 +4,7 @@ from util.toolkit_debug import debug
 from jira import JIRA
 from dateutil.parser import *
 import datetime
+from datetime import timezone, timedelta
 import traceback
 import re
 from util.jql import Status
@@ -278,6 +279,29 @@ def get_time_in_initial_status(status, changelog, created):
                 return result
 
 
+def get_time_in_current_status(status, changelog):
+    in_flag = False
+    in_time = ""
+    result = []
+
+    # log.debug("Getting time in current status {} ".format(status))
+
+    for history in changelog.histories:
+        for item in history.items:
+            if item.field == 'status':
+                if item.toString == status and not in_flag:
+                    in_flag = True
+                    # log.debug("Found  " + item.toString + " on " + history.created)
+                    in_time = parse(history.created)
+
+                    timezone_offset = 0.0  # UTC
+                    tzinfo = timezone(timedelta(hours=timezone_offset))
+                    out_time = datetime.datetime.now(tzinfo)
+                    result.append(calc_working_seconds(in_time, out_time))
+                    log.debug("get_time_in_current_status {} = {} sec (workhours: {} duration: {})".format(status, result[len(result)-1], datetime.timedelta(seconds=result[len(result)-1]), str(out_time-in_time)))
+
+    return result
+
 
 # @debug
 def jql_results_amount(jira, jql):
@@ -287,36 +311,3 @@ def jql_results_amount(jira, jql):
 
 def seconds_to_hours(sec):
     return sec/3600
-
-def get_class(fully_qualified_path, module_name, class_name, *instantiation):
-    """
-    Returns an instantiated class for the given string descriptors
-    :param fully_qualified_path: The path to the module eg("Utilities.Printer")
-    :param module_name: The module name eg("Printer")
-    :param class_name: The class name eg("ScreenPrinter")
-    :param instantiation: Any fields required to instantiate the class
-    :return: An instance of the class
-    """
-    p = __import__(fully_qualified_path)
-    m = getattr(p, module_name)
-    c = getattr(m, class_name)
-    instance = c(*instantiation)
-    return instance
-
-def ab_path_to_class(path, p):
-    # pkg.module.ClassName
-    _p_name = path.split(".")[0] + "." + path.split(".")[1]  # pkg.module
-    _m_name = path.split(".")[1]  # module
-    _c_name = path.split(".")[2]  # ClassName
-
-    # Instantiate class
-    c = get_class(_p_name, _m_name, _c_name, p)
-    return c
-
-def ab_subclass_path_from_action(s):
-    switcher = {
-        'live': "action_bundles.ab_live.ABLive",
-    }
-    ab_path = switcher.get(s, "n/a")
-    log.debug("Action '" + s + "' maps to AB class '" + ab_path + "'")
-    return ab_path
