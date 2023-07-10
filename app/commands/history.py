@@ -64,8 +64,8 @@ def exec():
         issues[issue.key]['t_current_status'] = sum(get_time_in_current_status(issues[issue.key]['fields']['status'], issue.changelog))
         # print(get_time_in_current_status(Status.DONE.value, issue.changelog))
 
-        # Process Efficiency = (Hands-on time / Total lead-time) * 100
-        hands_off_time = [issues[issue.key]['t_ready_for_analysis'],
+        # Flow Efficiency = (Hands-on time / Total lead-time) * 100
+        t_idle = [issues[issue.key]['t_ready_for_analysis'],
                           issues[issue.key]['t_ready_for_uxd'],
                           issues[issue.key]['t_ready_for_tech_review'],
                           issues[issue.key]['t_ready_for_refinement'],
@@ -76,7 +76,7 @@ def exec():
                           issues[issue.key]['t_ready_for_sign_off']]
 
         # If lead time is zero then the issue was worked off normal working hours so it should be counted as efficient
-        issues[issue.key]['process_efficiency_pct'] = round(((issues[issue.key]['aggregates']['t_lead'] - sum(hands_off_time)) / issues[issue.key]['aggregates']['t_lead']) * 100 if issues[issue.key]['aggregates']['t_lead'] else -1, 2)
+        issues[issue.key]['flow_efficiency_pct'] = round(((issues[issue.key]['aggregates']['t_lead'] - sum(t_idle)) / issues[issue.key]['aggregates']['t_lead']) * 100 if issues[issue.key]['aggregates']['t_lead'] else -1, 2)
 
         # print(vars(issue.fields))
         # Sizing Efficiency = (Size estimated / cycle time) * 100
@@ -87,11 +87,11 @@ def exec():
     max_t_lead = sorted(issues.items(), key=lambda kv: kv[1]['aggregates']['t_lead'], reverse=True)
     max_t_cycle = sorted(issues.items(), key=lambda kv: kv[1]['aggregates']['t_cycle'], reverse=True)
     max_t_in_same_status = sorted(issues.items(), key=lambda kv: kv[1]['t_current_status'], reverse=True)
-    min_process_efficiency_pct = sorted(issues.items(), key=lambda kv: kv[1]['process_efficiency_pct'], reverse=False)
+    min_flow_efficiency_pct = sorted(issues.items(), key=lambda kv: kv[1]['flow_efficiency_pct'], reverse=False)
     min_sizing_accuracy_pct = sorted(issues.items(), key=lambda kv: kv[1]['sizing_accuracy_pct'], reverse=False)
 
 
-    log.debug(json.dumps(min_process_efficiency_pct, indent=4))
+    log.debug(json.dumps(min_flow_efficiency_pct, indent=4))
     print("------------------------------------------------")
     log.debug(json.dumps(min_sizing_accuracy_pct, indent=4))
 
