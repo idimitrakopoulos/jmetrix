@@ -78,6 +78,7 @@ def exec():
         # If lead time is zero then the issue was worked off normal working hours so it should be counted as efficient
         issues[issue.key]['flow_efficiency_pct'] = round(((issues[issue.key]['aggregates']['t_lead'] - sum(t_idle)) / issues[issue.key]['aggregates']['t_lead']) * 100 if issues[issue.key]['aggregates']['t_lead'] else -1, 2)
 
+
         # print(vars(issue.fields))
         # Sizing Efficiency = (Size estimated / cycle time) * 100
         issues[issue.key]['sizing_accuracy_pct'] = round((issues[issue.key]['fields']['original_estimate'] / issues[issue.key]['aggregates']['t_cycle']) * 100 if issues[issue.key]['fields']['original_estimate'] and issues[issue.key]['aggregates']['t_cycle'] else -1, 2)
