@@ -6,9 +6,7 @@ from operator import itemgetter
 from util.toolkit import jira_token_authenticate, get_time_in_status, get_time_from_creation_to_extreme_status, \
     get_time_between_extreme_statuses, get_time_in_initial_status, get_time_in_current_status
 
-args = None
-
-def exec():
+def exec(args):
 
     # Connect to Jira instance
     jira = jira_token_authenticate(args.jira_server_url, args.jira_auth_token)
@@ -18,7 +16,7 @@ def exec():
     log.info("Executing JQL after modification '{}'".format(jql))
 
     # Execute JQL
-    jql_results = jira.search_issues(jql, expand='changelog', maxResults=10)
+    jql_results = jira.search_issues(jql, expand='changelog', maxResults=0)
     log.debug("Got '{}' result(s) from JQL execution".format(len(jql_results)))
     if len(jql_results) == 0:
         log.info("Exiting as there are zero results to process")
@@ -83,7 +81,7 @@ def exec():
         # Sizing Efficiency = (Size estimated / cycle time) * 100
         issues[issue.key]['sizing_accuracy_pct'] = round((issues[issue.key]['fields']['original_estimate'] / issues[issue.key]['aggregates']['t_cycle']) * 100 if issues[issue.key]['fields']['original_estimate'] and issues[issue.key]['aggregates']['t_cycle'] else -1, 2)
 
-        # log.debug(json.dumps(issues[issue.key], indent=4))
+        log.debug(json.dumps(issues[issue.key], indent=4))
 
     max_t_lead = sorted(issues.items(), key=lambda kv: kv[1]['aggregates']['t_lead'], reverse=True)
     max_t_cycle = sorted(issues.items(), key=lambda kv: kv[1]['aggregates']['t_cycle'], reverse=True)
@@ -92,9 +90,9 @@ def exec():
     min_sizing_accuracy_pct = sorted(issues.items(), key=lambda kv: kv[1]['sizing_accuracy_pct'], reverse=False)
 
 
-    log.debug(json.dumps(min_flow_efficiency_pct, indent=4))
-    print("------------------------------------------------")
-    log.debug(json.dumps(min_sizing_accuracy_pct, indent=4))
+    # log.debug(json.dumps(min_flow_efficiency_pct, indent=4))
+    # print("------------------------------------------------")
+    # log.debug(json.dumps(min_sizing_accuracy_pct, indent=4))
 
     # ipdb.set_trace()
 

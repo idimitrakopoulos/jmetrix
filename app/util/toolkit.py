@@ -31,7 +31,7 @@ def jira_token_authenticate(url, t):
         raise
     return j
 
-def run_jql(jira, jql, max=False, debug=False):
+def run_jql(jira, jql, max=False, debug=True):
     if debug:
         log.debug("JQL -> {}".format(jql))
     return jira.search_issues(jql, maxResults=max)
@@ -311,3 +311,11 @@ def jql_results_amount(jira, jql):
 
 def seconds_to_hours(sec):
     return sec/3600
+
+def print_issue_summary(issues):
+    result = ""
+
+    for issue in issues:
+        log.debug("Key: {}, Type: {}, Labels: {}".format(issue.key, issue.fields.issuetype, issue.fields.labels))
+
+    return result

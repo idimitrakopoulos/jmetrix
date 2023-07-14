@@ -35,10 +35,12 @@ class Status(StrValueEnum):
     READY_FOR_SIGN_OFF = "Ready for Sign Off"
     DONE = 'Done'
     CLOSED = 'Closed'
-class CustomFieldNames(StrValueEnum):
-    REOPEN_REASON = 'Reopen Reason'
-    PAUSE_PREPARATION_REASON = 'Pause Preparation Reason'
-    PAUSE_WORK_REASON = 'Pause Work Reason'
-    REVISION_REASON = 'Revision Reason'
-    ORIGIN = 'Origin'
 
+class Filters(StrValueEnum):
+    CREATED_DATES_FROM_TO = "AND created >= '{} 00:00' AND created <= '{} 23:59'"
+    RESOLVED_DATES_FROM_TO = "AND resolved >= '{} 00:00' AND resolved <= '{} 23:59'"
+    LABEL = "AND labels in ({})"
+    RELEASED = "AND status in (Done, Closed) AND Resolution not in (Rejected)"
+    REJECTED = "AND status in (Done, Closed) AND Resolution in (Rejected)"
+class JQLs(StrValueEnum):
+    JQL_BURNUP = "project = '{}'"
