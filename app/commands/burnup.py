@@ -55,10 +55,3 @@ def exec(args):
     log.info("Total issues rejected between {} and {}: {}".format(args.date_from, args.date_to, len(jql_results)))
 
 
-    # # Execute JQL
-    # jql_results = jira.search_issues(jql, expand='changelog', maxResults=0)
-    # log.debug("Got '{}' result(s) from JQL execution".format(len(jql_results)))
-    # if len(jql_results) == 0:
-    #     log.info("Exiting as there are zero results to process")
-    #     exit(0)
-

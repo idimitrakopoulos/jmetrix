@@ -313,9 +313,7 @@ def seconds_to_hours(sec):
     return sec/3600
 
 def print_issue_summary(issues):
-    result = ""
+    if issues:
+        for issue in issues:
+            log.debug("Key: {}, Type: {}, Labels: {}".format(issue.key, issue.fields.issuetype, issue.fields.labels))
 
-    for issue in issues:
-        log.debug("Key: {}, Type: {}, Labels: {}".format(issue.key, issue.fields.issuetype, issue.fields.labels))
-
-    return result
