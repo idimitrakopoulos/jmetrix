@@ -34,7 +34,7 @@ def jira_token_authenticate(url, t):
 def run_jql(jira, jql, max=False, debug=True):
     if debug:
         log.debug("JQL -> {}".format(jql))
-    return jira.search_issues(jql, maxResults=max)
+    return jira.search_issues(jql, expand='changelog', maxResults=max)
 
 # @debug
 def count_transitions(status_from, status_to, changelog):
@@ -316,4 +316,23 @@ def print_issue_summary(issues):
     if issues:
         for issue in issues:
             log.debug("Key: {}, Type: {}, Labels: {}".format(issue.key, issue.fields.issuetype, issue.fields.labels))
+    else:
+        log.debug("No issues to print.")
 
+def print_issue_history(issues):
+    if issues:
+        for issue in issues:
+            log.debug("-----------------------------------------------------------------------------------------------")
+            log.debug("Key: {}, Type: {}".format(issue.key, issue.fields.issuetype))
+            for history in issue.changelog.histories:
+                for item in history.items:
+                    if item.field == 'status' or item.field == 'summary' or item.field == 'type' or item.field == 'labels':
+                        log.debug("Change of '{}' by '{}' on '{}'".format(item.field, history.author.displayName, parse(history.created).date()))
+                        log.debug("    {} -> {}".format(item.fromString, item.toString))
+                    elif (item.field == 'Acceptance Criteria'):
+                        log.debug("Change of '{}' by '{}' on '{}'".format(item.field, history.author.displayName, parse(history.created).date()))
+                        log.debug("    *** Text too large to display")
+                    # else:
+                    #     print(item.field)
+    else:
+        log.debug("No issues to print.")
