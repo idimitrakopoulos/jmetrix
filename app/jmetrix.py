@@ -25,7 +25,6 @@ if __name__ == '__main__':
     history_optional_args= history_parser.add_argument_group('optional arguments')
     history_optional_args.add_argument('-V', '--verbose', action='store_true', help='Run script in Verbose mode')
 
-
     burnup_parser = subparsers.add_parser('burnup', help='Burnups from Jira')
     burnup_required_args= burnup_parser.add_argument_group('required arguments')
     burnup_required_args.add_argument('-u', '--url', dest='jira_server_url', type=str, help='The Jira server base URL (e.g. https://xxxx.xxx.xxx)', required=True)
@@ -41,7 +40,11 @@ if __name__ == '__main__':
 
     # Parse arguments
     args = parser.parse_args()
-    log = logger.setup_custom_logger('root', logging.DEBUG if args.verbose else logging.INFO)
+    # Create logger with proper log level
+    try:
+        log = logger.setup_custom_logger('root', logging.DEBUG if args.verbose else logging.INFO)
+    except AttributeError:
+        log = logger.setup_custom_logger('root', logging.INFO)
 
     if args.ab is None:  # End execution with help if no arguments were supplied
         parser.print_help()

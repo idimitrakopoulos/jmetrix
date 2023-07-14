@@ -319,6 +319,26 @@ def print_issue_summary(issues):
     else:
         log.debug("No issues to print.")
 
+def fancy_print_issue_summary(issues):
+    if issues:
+        from rich.console import Console
+        from rich.table import Table
+
+        table = Table(title="Issues")
+
+        table.add_column("Key", justify="left", style="bright_yellow", no_wrap=True)
+        table.add_column("Type", justify="left", style="white", no_wrap=True)
+        table.add_column("Labels", justify="left", style="white")
+
+        for issue in issues:
+            table.add_row(issue.key, issue.fields.issuetype.name, ', '.join(map(str, issue.fields.labels)))
+
+        console = Console()
+        console.print(table)
+    else:
+        log.debug("No issues to print.")
+
+
 def print_issue_history(issues):
     if issues:
         for issue in issues:
@@ -334,5 +354,35 @@ def print_issue_history(issues):
                         log.debug("    *** Text too large to display")
                     # else:
                     #     print(item.field)
+    else:
+        log.debug("No issues to print.")
+
+
+def fancy_print_issue_history(issues):
+    if issues:
+        from rich.console import Console
+        from rich.table import Table
+
+        table = Table(title="Issues")
+
+        table.add_column("Key", justify="left", style="bright_yellow", no_wrap=True)
+        table.add_column("User", justify="left", style="white", no_wrap=True)
+        table.add_column("Date", justify="left", style="white", no_wrap=True)
+        table.add_column("Type", justify="left", style="white")
+        table.add_column("From", justify="left", style="white")
+        table.add_column("To", justify="left", style="white")
+
+        for issue in issues:
+            log.debug("Key: {}, Type: {}".format(issue.key, issue.fields.issuetype))
+            for history in issue.changelog.histories:
+                for item in history.items:
+                    if item.field == 'status' or item.field == 'summary' or item.field == 'type' or item.field == 'labels':
+                        table.add_row(issue.key, history.author.displayName, str(parse(history.created).date()), item.field, item.fromString, item.toString)
+                    elif (item.field == 'Acceptance Criteria'):
+                        table.add_row(issue.key, history.author.displayName, str(parse(history.created).date()), item.field, "***", "***")
+                    # else:
+                    #     print(item.field)
+        console = Console()
+        console.print(table)
     else:
         log.debug("No issues to print.")

@@ -3,4 +3,6 @@ jira
 python-dateutil
 ipdb
 rich
-
+plotly
+kaleido
+pandas
