@@ -40,7 +40,7 @@ def exec(args):
     jira = jira_token_authenticate(args.jira_server_url, args.jira_auth_token)
 
     # Add project to JQL
-    jql_project = JQLs.JQL_BURNUP.value.format(args.jira_project)
+    jql_project = JQLs.JQL_PROJECT.value.format(args.jira_project)
 
     # Add identifier to JQL
     jql_project_identifier = "{} {}".format(jql_project, Filters.LABEL.value.format(args.jira_label))
