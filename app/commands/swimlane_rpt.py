@@ -69,8 +69,6 @@ def exec(args):
     # Add dates to in flight filter
     jql_project_identifier_in_flight_dates = "{} {}".format(jql_project_identifier_inflight, Filters.NOT_CREATED_DATES_FROM_TO.value.format(args.date_from))
 
-
-
     # TOTAL ISSUES
     jql_results = run_jql(jira, jql_project_identifier)
     log.info("Total issues: {}".format(len(jql_results)))
