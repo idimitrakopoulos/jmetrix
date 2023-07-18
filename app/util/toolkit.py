@@ -426,7 +426,7 @@ def fancy_print_issue_status(issues):
         table.add_column("Workhours in status (h)", justify="left", style="white")
         table.add_column("Duration in status (h)", justify="left", style="white")
         table.add_column("Original Estimation (h)", justify="left", style="white")
-        table.add_column("Actual Workhoursf (h)", justify="left", style="white")
+        table.add_column("Actual Workhours (h)", justify="left", style="white")
         table.add_column("Overdue %", justify="left", style="white")
 
 

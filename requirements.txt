@@ -6,3 +6,4 @@ rich
 plotly
 kaleido
 pandas
+flask
