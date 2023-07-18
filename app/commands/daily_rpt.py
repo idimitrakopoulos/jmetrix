@@ -21,7 +21,6 @@ def exec(args):
     discovery_issues_in_flight = run_jql(jira, jql_project_delivery_in_flight)
     delivery_daily_rpt['issues_in_flight'] = len(discovery_issues_in_flight)
 
-    fancy_print_issue_status(discovery_issues_in_flight)
 
     issues = dict()
 
@@ -38,6 +37,8 @@ def exec(args):
         issues[issue.key]['fields']['summary'] = issue.fields.summary
         issues[issue.key]['fields']['assignee'] = None if isinstance(issue.fields.assignee, type(None)) else issue.fields.assignee.displayName
         issues[issue.key]['fields']['status'] = issue.fields.status.name
+        issues[issue.key]['fields']['type'] = issue.fields.issuetype.name
+        issues[issue.key]['fields']['labels'] = issue.fields.labels
         issues[issue.key]['fields']['original_estimate'] = issue.fields.timeoriginalestimate
 
         issues[issue.key]['t_current_status'] = sum(get_time_in_current_status(issues[issue.key]['fields']['status'], issue.changelog))
@@ -51,14 +52,14 @@ def exec(args):
     max_t_in_same_status = sorted(issues.items(), key=lambda kv: kv[1]['t_current_status'], reverse=True)
     max_pct_overdue = sorted(issues.items(), key=lambda kv: kv[1]['pct_overdue'], reverse=True)
 
-
+    # fancy_print_issue_assignees(group_issues_by_assignee(issues))
+    fancy_print_issue_status(issues)
 
     for assignee, issues in group_issues_by_assignee(issues).items():
       print(f"{assignee}")
       for issue in issues:
-        if assignee is None and not issue['fields']['status'].startswith("Ready"):
-            print("  * {} | {} | {}h".format(issue['key'], issue['fields']['status'], seconds_to_hours(issue['t_current_status'])))
-        elif assignee is not None and issue['fields']['status'].startswith("Ready"):
+        if (assignee is None and not issue['fields']['status'].startswith("Ready")) \
+                or assignee is not None and issue['fields']['status'].startswith("Ready"):
             print("  * {} | {} | {}h".format(issue['key'], issue['fields']['status'], seconds_to_hours(issue['t_current_status'])))
         else:
             print("    {} | {} | {}h".format(issue['key'], issue['fields']['status'], seconds_to_hours(issue['t_current_status'])))

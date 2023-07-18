@@ -50,7 +50,7 @@ if __name__ == '__main__':
     daily_rpt_required_args.add_argument('-t', '--token', dest='jira_auth_token', type=str, help='The Jira authentication token', required=True)
     daily_rpt_required_args.add_argument('-p', '--project', dest='jira_project', type=str, help='The Jira project key (e.g. OGST)', required=True)
     daily_rpt_optional_args = daily_rpt_parser.add_argument_group('optional arguments')
-    daily_rpt_optional_args.add_argument('-l', '--label', dest='jira_label', type=str, help='The issue label to use for issue search')
+    # daily_rpt_optional_args.add_argument('-l', '--label', dest='jira_label', type=str, help='The issue label to use for issue search')
     daily_rpt_optional_args.add_argument('-d', '--discovery', action='store_true', help='Run report for discovery board too')
     daily_rpt_optional_args.add_argument('-V', '--verbose', action='store_true', help='Run script in Verbose mode')
 

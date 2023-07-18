@@ -416,42 +416,73 @@ def fancy_print_issue_status(issues):
         from rich.console import Console
         from rich.table import Table
 
-        table = Table(title="Issues")
+        table = Table()
 
         table.add_column("Key", justify="left", style="bright_yellow", no_wrap=True)
         table.add_column("Type", justify="left", style="white")
         table.add_column("Assignee", justify="left", style="white", no_wrap=True)
         table.add_column("Labels", justify="left", style="white")
         table.add_column("Status", justify="left", style="white", no_wrap=True)
-        table.add_column("Workhours in status (h)", justify="left", style="white", no_wrap=True)
-        table.add_column("Duration in status (h)", justify="left", style="white", no_wrap=True)
-        table.add_column("Original Estimation (h)", justify="left", style="white", no_wrap=True)
-        table.add_column("Actual Duration (h)", justify="left", style="white", no_wrap=True)
-
+        table.add_column("Workhours in status (h)", justify="left", style="white")
+        table.add_column("Duration in status (h)", justify="left", style="white")
+        table.add_column("Original Estimation (h)", justify="left", style="white")
+        table.add_column("Actual Workhoursf (h)", justify="left", style="white")
+        table.add_column("Overdue %", justify="left", style="white")
 
 
         for issue in issues:
+            # ipdb.set_trace()
             # log.debug("Key: {}, Type: {}".format(issue.key, issue.fields.issuetype))
-            table.add_row(issue.key,
-                          issue.fields.issuetype.name,
-                          "Unassigned" if isinstance(issue.fields.assignee, type(None)) else issue.fields.assignee.displayName,
-                          ', '.join(map(str, issue.fields.labels)),
-                          issue.fields.status.name,
-                          str(seconds_to_hours(sum(get_time_in_current_status(issue.fields.status.name, issue.changelog)))),
-                          str(seconds_to_hours(get_duration_in_current_status(issue.fields.status.name, issue.changelog).total_seconds())),
-                          "-" if isinstance(issue.fields.timeoriginalestimate, type(None)) else str(seconds_to_hours(issue.fields.timeoriginalestimate)),
-                          str(seconds_to_hours(get_time_from_creation_to_extreme_status(issue.fields.created, issue.fields.status.name, issue.changelog))))
+            table.add_row(issues[issue]['key'],
+                          issues[issue]['fields']['type'],
+                          "Unassigned" if isinstance(issues[issue]['fields']['assignee'], type(None)) else issues[issue]['fields']['assignee'],
+                          ', '.join(map(str, issues[issue]['fields']['labels'])),
+                          issues[issue]['fields']['status'],
+                          str(seconds_to_hours(issues[issue]['t_current_status'])),
+                          str(seconds_to_hours(issues[issue]['d_current_status'])),
+                          "-" if isinstance(issues[issue]['fields']['original_estimate'], type(None)) else str(seconds_to_hours(issues[issue]['fields']['original_estimate'])),
+                          str(seconds_to_hours(issues[issue]['t_actual'])),
+                          "{}%".format(str(round(issues[issue]['pct_overdue'], 2))))
 
         console = Console()
         console.print(table)
     else:
         log.debug("No issues to print.")
 
+# def fancy_print_issue_assignees(issues):
+#     # ipdb.set_trace()
+#     if issues:
+#         from rich.console import Console
+#         from rich.table import Table
+#
+#         table = Table()
+#         table.add_column("W", justify="left", style="bright_red")
+#         table.add_column("Assignee", justify="left", style="bright_yellow", no_wrap=True)
+#         table.add_column("Key", justify="left", style="white", no_wrap=True)
+#         table.add_column("Type", justify="left", style="white")
+#         table.add_column("Labels", justify="left", style="white")
+#         table.add_column("Status", justify="left", style="white", no_wrap=True)
+#         table.add_column("Workhours in status (h)", justify="left", style="white", no_wrap=True)
+#
+#         for assignee in issues:
+#             # log.debug("Key: {}, Type: {}".format(issue.key, issue.fields.issuetype))
+#             table.add_row("*" if (issues[assignee] is None and not issue[assignee]['fields']['status'].startswith("Ready")) or assignee is not None and issues[assignee]['fields']['status'].startswith("Ready") else "",
+#                           "Unassigned" if isinstance(issues[assignee].fields.assignee, type(None)) else assignee.fields.assignee.displayName,
+#                           assignee.key,
+#                           assignee.fields.issuetype.name,
+#                           ', '.join(map(str, assignee.fields.labels)),
+#                           assignee.fields.status.name,
+#                           str(seconds_to_hours(sum(get_time_in_current_status(assignee.fields.status.name, assignee.changelog)))))
+#
+#         console = Console()
+#         console.print(table)
+#     else:
+#         log.debug("No issues to print.")
 
-def group_issues_by_assignee(dict):
+def group_issues_by_assignee(issues):
     import collections
     grouped_dict = collections.defaultdict(list)
-    for key, value in dict.items():
+    for key, value in issues.items():
         assignee = value['fields']['assignee']
         grouped_dict[assignee].append(value)
     return grouped_dict
