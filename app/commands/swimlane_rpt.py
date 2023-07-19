@@ -80,7 +80,7 @@ def exec(args):
     # TOTAL ISSUES CREATED BETWEEN DATES
     jql_results = run_jql(jira, jql_project_identifier_dates)
     log.info("Total issues created between {} and {}: {}".format(args.date_from, args.date_to, len(jql_results)))
-    fancy_print_issue_summary(jql_results)
+    fancy_print_issue_summary(jql_results, jql_project_identifier_dates)
 
     # TOTAL ISSUES RELEASED BETWEEN DATES
     jql_results = run_jql(jira, jql_project_identifier_released_dates)
@@ -93,4 +93,4 @@ def exec(args):
     # TOTAL ISSUES IN FLIGHT BETWEEN DATES
     jql_results = run_jql(jira, jql_project_identifier_in_flight_dates)
     log.info("Total issues in flight NOT created after {}: {}".format(args.date_from, len(jql_results)))
-    fancy_print_issue_history(jql_results)
+    fancy_print_issue_history(jql_results, jql_project_identifier_in_flight_dates)

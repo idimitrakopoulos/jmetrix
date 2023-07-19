@@ -342,12 +342,12 @@ def print_issue_summary(issues):
     else:
         log.debug("No issues to print.")
 
-def fancy_print_issue_summary(issues):
+def fancy_print_issue_summary(issues, title=""):
     if issues:
         from rich.console import Console
         from rich.table import Table
 
-        table = Table(title="Issues")
+        table = Table(title=title)
 
         table.add_column("Key", justify="left", style="bright_yellow", no_wrap=True)
         table.add_column("Type", justify="left", style="white", no_wrap=True)
@@ -372,7 +372,7 @@ def print_issue_history(issues):
                     if item.field == 'status' or item.field == 'summary' or item.field == 'type' or item.field == 'labels':
                         log.debug("Change of '{}' by '{}' on '{}'".format(item.field, history.author.displayName, parse(history.created).date()))
                         log.debug("    {} -> {}".format(item.fromString, item.toString))
-                    elif (item.field == 'Acceptance Criteria'):
+                    elif item.field == 'Acceptance Criteria':
                         log.debug("Change of '{}' by '{}' on '{}'".format(item.field, history.author.displayName, parse(history.created).date()))
                         log.debug("    *** Text too large to display")
                     # else:
@@ -381,12 +381,12 @@ def print_issue_history(issues):
         log.debug("No issues to print.")
 
 
-def fancy_print_issue_history(issues):
+def fancy_print_issue_history(issues, title=""):
     if issues:
         from rich.console import Console
         from rich.table import Table
 
-        table = Table(title="Issues")
+        table = Table(title=title)
 
         table.add_column("Key", justify="left", style="bright_yellow", no_wrap=True)
         table.add_column("User", justify="left", style="white", no_wrap=True)
@@ -411,12 +411,12 @@ def fancy_print_issue_history(issues):
         log.debug("No issues to print.")
 
 
-def fancy_print_issue_status(issues):
+def fancy_print_issue_timings(issues, title=""):
     if issues:
         from rich.console import Console
         from rich.table import Table
 
-        table = Table()
+        table = Table(title=title)
 
         table.add_column("Key", justify="left", style="bright_yellow", no_wrap=True)
         table.add_column("Type", justify="left", style="white")
@@ -428,7 +428,6 @@ def fancy_print_issue_status(issues):
         table.add_column("Original Estimation (h)", justify="left", style="white")
         table.add_column("Actual Workhours (h)", justify="left", style="white")
         table.add_column("Overdue %", justify="left", style="white")
-
 
         for issue in issues:
             # ipdb.set_trace()
