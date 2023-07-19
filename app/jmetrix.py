@@ -10,13 +10,7 @@ if __name__ == '__main__':
     # Instantiate the parser
     parser = argparse.ArgumentParser(prog='jmetrix', description='A CLI tool for Jira metrics', epilog='(c) 2012-present Iason Dimitrakopoulos - idimitrakopoulos@gmail.com')
 
-    # Live
-    subparsers = parser.add_subparsers(help='sub-command help', dest='ab')
-    live_parser = subparsers.add_parser('live', help='Live view of a JQL')
-    live_required_args = live_parser.add_argument_group('required arguments')
-    live_required_args.add_argument('-u', '--url', dest='jira_server_url', type=str, help='The Jira server base URL (e.g. https://xxxx.xxx.xxx)', required=True)
-    live_required_args.add_argument('-t', '--token', dest='jira_auth_token', type=str, help='The Jira authentication token', required=True)
-    live_required_args.add_argument('-j', '--jql', dest='jira_jql', type=str, help='The JQL query you want to get metrics for.', required=True)
+    subparsers = parser.add_subparsers(help='sub-command help', dest='commands')
 
     # History
     history_parser = subparsers.add_parser('history', help='Historic view of a JQL')
@@ -62,11 +56,11 @@ if __name__ == '__main__':
     except AttributeError:
         log = logger.setup_custom_logger('root', logging.INFO)
 
-    if args.ab is None:  # End execution with help if no arguments were supplied
+    if args.commands is None:  # End execution with help if no arguments were supplied
         parser.print_help()
         exit(0)
     else:  # Execute the appropriate command
-        cmd = importlib.import_module("commands." + args.ab)
+        cmd = importlib.import_module("commands." + args.commands)
         cmd.exec(args)
 
 
