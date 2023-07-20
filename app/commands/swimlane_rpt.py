@@ -1,7 +1,7 @@
 import logging
 log = logging.getLogger('root')
 from util.jql import JQLs, Filters
-from util.toolkit import jira_token_authenticate, run_jql, print_issue_summary, print_issue_history, fancy_print_issue_summary, fancy_print_issue_history
+from util.toolkit import jira_token_authenticate, run_jql, fancy_print_issue_summary, fancy_print_issue_history, fancy_print_jql_info
 
 def exec(args):
 
@@ -69,28 +69,34 @@ def exec(args):
     # Add dates to in flight filter
     jql_project_identifier_in_flight_dates = "{} {}".format(jql_project_identifier_inflight, Filters.NOT_CREATED_DATES_FROM_TO.value.format(args.date_from))
 
+    aggregates = dict()
+
     # TOTAL ISSUES
-    jql_results = run_jql(jira, jql_project_identifier)
-    log.info("Total issues: {}".format(len(jql_results)))
+    total_issues = run_jql(jira, jql_project_identifier)
+    aggregates['total_issues'] = {'length': len(total_issues), 'jql': jql_project_identifier}
 
     # TOTAL ISSUES RELEASED
-    jql_results = run_jql(jira, jql_project_identifier_released)
-    log.info("Total issues released: {}".format(len(jql_results)))
+    total_issues_released = run_jql(jira, jql_project_identifier_released)
+    aggregates['total_issues_released'] = {'length': len(total_issues_released), 'jql': jql_project_identifier_released}
 
     # TOTAL ISSUES CREATED BETWEEN DATES
-    jql_results = run_jql(jira, jql_project_identifier_dates)
-    log.info("Total issues created between {} and {}: {}".format(args.date_from, args.date_to, len(jql_results)))
-    fancy_print_issue_summary(jql_results, jql_project_identifier_dates)
+    total_issues_created_between_dates = run_jql(jira, jql_project_identifier_dates)
+    aggregates['total_issues_created_between_dates'] = {'length': len(total_issues_created_between_dates), 'jql': jql_project_identifier_dates}
 
     # TOTAL ISSUES RELEASED BETWEEN DATES
-    jql_results = run_jql(jira, jql_project_identifier_released_dates)
-    log.info("Total issues released between {} and {}: {}".format(args.date_from, args.date_to, len(jql_results)))
+    total_issues_released_between_dates = run_jql(jira, jql_project_identifier_released_dates)
+    aggregates['total_issues_released_between_dates'] = {'length': len(total_issues_released_between_dates), 'jql': jql_project_identifier_released_dates}
 
     # TOTAL ISSUES REJECTED BETWEEN DATES
-    jql_results = run_jql(jira, jql_project_identifier_rejected_dates)
-    log.info("Total issues rejected between {} and {}: {}".format(args.date_from, args.date_to, len(jql_results)))
+    total_issues_rejected_between_dates = run_jql(jira, jql_project_identifier_rejected_dates)
+    aggregates['total_issues_rejected_between_dates'] = {'length': len(total_issues_rejected_between_dates), 'jql': jql_project_identifier_rejected_dates}
 
     # TOTAL ISSUES IN FLIGHT BETWEEN DATES
-    jql_results = run_jql(jira, jql_project_identifier_in_flight_dates)
-    log.info("Total issues in flight NOT created after {}: {}".format(args.date_from, len(jql_results)))
-    fancy_print_issue_history(jql_results, jql_project_identifier_in_flight_dates)
+    total_issues_in_flight_after_date = run_jql(jira, jql_project_identifier_in_flight_dates)
+    aggregates['total_issues_in_flight_after_date'] = {'length': len(total_issues_in_flight_after_date), 'jql': jql_project_identifier_in_flight_dates}
+
+    # Print rich tables
+    fancy_print_jql_info(aggregates, "Swimlane report aggregates")
+    fancy_print_issue_summary(total_issues_created_between_dates, jql_project_identifier_dates)
+    fancy_print_issue_history(total_issues_in_flight_after_date, jql_project_identifier_in_flight_dates)
+

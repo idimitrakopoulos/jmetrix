@@ -335,12 +335,6 @@ def jql_results_amount(jira, jql):
 def seconds_to_hours(sec):
     return sec/3600
 
-def print_issue_summary(issues):
-    if issues:
-        for issue in issues:
-            log.debug("Key: {}, Type: {}, Labels: {}".format(issue.key, issue.fields.issuetype, issue.fields.labels))
-    else:
-        log.debug("No issues to print.")
 
 def fancy_print_issue_summary(issues, title=""):
     if issues:
@@ -351,34 +345,23 @@ def fancy_print_issue_summary(issues, title=""):
 
         table.add_column("Key", justify="left", style="bright_yellow", no_wrap=True)
         table.add_column("Type", justify="left", style="white", no_wrap=True)
+        table.add_column("Summary", justify="left", style="white")
         table.add_column("Labels", justify="left", style="white")
-
+        table.add_column("Status", justify="left", style="white", no_wrap=True)
+        table.add_column("Resolution", justify="left", style="white")
         for issue in issues:
-            table.add_row(issue.key, issue.fields.issuetype.name, ', '.join(map(str, issue.fields.labels)))
+            table.add_row(issue.key,
+                          issue.fields.issuetype.name,
+                          issue.fields.summary,
+                          ', '.join(map(str, issue.fields.labels)),
+                          issue.fields.status.name,
+                          "None" if isinstance(issue.fields.resolution, type(None)) else issue.fields.resolution.name)
 
         console = Console()
         console.print(table)
     else:
         log.debug("No issues to print.")
 
-
-def print_issue_history(issues):
-    if issues:
-        for issue in issues:
-            log.debug("-----------------------------------------------------------------------------------------------")
-            log.debug("Key: {}, Type: {}".format(issue.key, issue.fields.issuetype))
-            for history in issue.changelog.histories:
-                for item in history.items:
-                    if item.field == 'status' or item.field == 'summary' or item.field == 'type' or item.field == 'labels':
-                        log.debug("Change of '{}' by '{}' on '{}'".format(item.field, history.author.displayName, parse(history.created).date()))
-                        log.debug("    {} -> {}".format(item.fromString, item.toString))
-                    elif item.field == 'Acceptance Criteria':
-                        log.debug("Change of '{}' by '{}' on '{}'".format(item.field, history.author.displayName, parse(history.created).date()))
-                        log.debug("    *** Text too large to display")
-                    # else:
-                    #     print(item.field)
-    else:
-        log.debug("No issues to print.")
 
 
 def fancy_print_issue_history(issues, title=""):
@@ -396,7 +379,7 @@ def fancy_print_issue_history(issues, title=""):
         table.add_column("To", justify="left", style="white")
 
         for issue in issues:
-            log.debug("Key: {}, Type: {}".format(issue.key, issue.fields.issuetype))
+            # log.debug("Key: {}, Type: {}".format(issue.key, issue.fields.issuetype))
             for history in issue.changelog.histories:
                 for item in history.items:
                     if item.field == 'status' or item.field == 'summary' or item.field == 'type' or item.field == 'labels':
@@ -405,6 +388,7 @@ def fancy_print_issue_history(issues, title=""):
                         table.add_row(issue.key, history.author.displayName, str(parse(history.created).date()), item.field, "***", "***")
                     # else:
                     #     print(item.field)
+            table.add_section()
         console = Console()
         console.print(table)
     else:
@@ -447,6 +431,29 @@ def fancy_print_issue_timings(issues, title=""):
         console.print(table)
     else:
         log.debug("No issues to print.")
+
+
+def fancy_print_jql_info(aggregates, title=""):
+    if aggregates:
+        from rich.console import Console
+        from rich.table import Table
+
+        table = Table(title=title)
+
+        table.add_column("Label", justify="left", style="bright_yellow", no_wrap=True)
+        table.add_column("JQL", justify="left", style="white")
+        table.add_column("Number of issues", justify="left", style="white", no_wrap=True)
+
+        for aggregate in aggregates:
+            # ipdb.set_trace()
+            table.add_row(str(aggregate),
+                          str(aggregates[aggregate]['jql']),
+                          str(aggregates[aggregate]['length']))
+
+        console = Console()
+        console.print(table)
+    else:
+        log.debug("No aggregates to print.")
 
 # def fancy_print_issue_assignees(issues):
 #     # ipdb.set_trace()

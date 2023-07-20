@@ -51,10 +51,8 @@ if __name__ == '__main__':
     # Parse arguments
     args = parser.parse_args()
     # Create logger with proper log level
-    try:
-        log = logger.setup_custom_logger('root', logging.DEBUG if args.verbose else logging.INFO)
-    except AttributeError:
-        log = logger.setup_custom_logger('root', logging.INFO)
+
+    log = logger.setup_custom_logger('root', logging.INFO if isinstance(args.verbose, type(None)) else logging.DEBUG)
 
     if args.commands is None:  # End execution with help if no arguments were supplied
         parser.print_help()
