@@ -12,14 +12,14 @@ if __name__ == '__main__':
 
     subparsers = parser.add_subparsers(help='sub-command help', dest='commands')
 
-    # History
-    history_parser = subparsers.add_parser('history', help='Historic view of a JQL')
-    history_required_args = history_parser.add_argument_group('required arguments')
-    history_required_args.add_argument('-u', '--url', dest='jira_server_url', type=str, help='The Jira server base URL (e.g. https://xxxx.xxx.xxx)', required=True)
-    history_required_args.add_argument('-t', '--token', dest='jira_auth_token', type=str, help='The Jira authentication token', required=True)
-    history_required_args.add_argument('-j', '--jql', dest='jira_jql', type=str, help='The JQL query you want to get metrics for.', required=True)
-    history_optional_args = history_parser.add_argument_group('optional arguments')
-    history_optional_args.add_argument('-V', '--verbose', action='store_true', help='Run script in Verbose mode')
+    # Inspect
+    inspect_parser = subparsers.add_parser('inspect', help='Inspect a JQL')
+    inspect_required_args = inspect_parser.add_argument_group('required arguments')
+    inspect_required_args.add_argument('-u', '--url', dest='jira_server_url', type=str, help='The Jira server base URL (e.g. https://xxxx.xxx.xxx)', required=True)
+    inspect_required_args.add_argument('-t', '--token', dest='jira_auth_token', type=str, help='The Jira authentication token', required=True)
+    inspect_required_args.add_argument('-j', '--jql', dest='jira_jql', type=str, help='The JQL query you want to get metrics for.', required=True)
+    inspect_optional_args = inspect_parser.add_argument_group('optional arguments')
+    inspect_optional_args.add_argument('-V', '--verbose', action='store_true', help='Run script in Verbose mode')
 
     # Swimlane report
     swimlane_rpt_parser = subparsers.add_parser('swimlane_rpt', help='Swimlane Report from Jira based on specific label')
@@ -50,9 +50,9 @@ if __name__ == '__main__':
 
     # Parse arguments
     args = parser.parse_args()
-    # Create logger with proper log level
 
-    log = logger.setup_custom_logger('root', logging.INFO if isinstance(args.verbose, type(None)) else logging.DEBUG)
+    # Create logger with proper log level
+    log = logger.setup_custom_logger('root', logging.DEBUG if args.verbose else logging.INFO)
 
     if args.commands is None:  # End execution with help if no arguments were supplied
         parser.print_help()

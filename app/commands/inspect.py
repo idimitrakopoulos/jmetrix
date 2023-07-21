@@ -4,7 +4,7 @@ from util.jql import Status
 import ipdb, json
 from operator import itemgetter
 from util.toolkit import jira_token_authenticate, get_time_in_status, get_time_from_creation_to_extreme_status, \
-    get_time_between_extreme_statuses, get_time_in_initial_status, get_time_in_current_status
+    get_time_between_extreme_statuses, get_time_in_initial_status, get_time_in_current_status, run_jql
 
 def exec(args):
 
@@ -12,11 +12,11 @@ def exec(args):
     jira = jira_token_authenticate(args.jira_server_url, args.jira_auth_token)
 
     # JQL append required filters for this command to work
-    jql = "{} AND status in ({},{})".format(args.jira_jql, Status.DONE.value, Status.CLOSED.value)
-    log.info("Executing JQL after modification '{}'".format(jql))
+    # jql = "{} AND status in ({},{})".format(args.jira_jql, Status.DONE.value, Status.CLOSED.value)
+    # log.info("Executing JQL after modification '{}'".format(jql))
 
     # Execute JQL
-    jql_results = jira.search_issues(jql, expand='changelog', maxResults=0)
+    jql_results = run_jql(jira, args.jira_jql)
     log.debug("Got '{}' result(s) from JQL execution".format(len(jql_results)))
     if len(jql_results) == 0:
         log.info("Exiting as there are zero results to process")
@@ -34,7 +34,10 @@ def exec(args):
         issues[issue.key]['fields'] = dict()
         issues[issue.key]['fields']['url'] = jira.server_url + "/browse/"+ issue.key
         issues[issue.key]['fields']['summary'] = issue.fields.summary
+        issues[issue.key]['fields']['assignee'] = None if isinstance(issue.fields.assignee, type(None)) else issue.fields.assignee.displayName
         issues[issue.key]['fields']['status'] = issue.fields.status.name
+        issues[issue.key]['fields']['type'] = issue.fields.issuetype.name
+        issues[issue.key]['fields']['labels'] = issue.fields.labels
         issues[issue.key]['fields']['original_estimate'] = issue.fields.timeoriginalestimate
 
         issues[issue.key]['aggregates'] = dict()
@@ -60,7 +63,6 @@ def exec(args):
         issues[issue.key]['t_ready_for_sign_off'] = sum(get_time_in_status(Status.READY_FOR_SIGN_OFF.value, issue.changelog))
         issues[issue.key]['t_done'] = sum(get_time_in_status(Status.DONE.value, issue.changelog))
         issues[issue.key]['t_current_status'] = sum(get_time_in_current_status(issues[issue.key]['fields']['status'], issue.changelog))
-        # print(get_time_in_current_status(Status.DONE.value, issue.changelog))
 
         # Flow Efficiency = (Hands-on time / Total lead-time) * 100
         t_idle = [issues[issue.key]['t_ready_for_analysis'],
@@ -88,8 +90,8 @@ def exec(args):
     max_t_in_same_status = sorted(issues.items(), key=lambda kv: kv[1]['t_current_status'], reverse=True)
     min_flow_efficiency_pct = sorted(issues.items(), key=lambda kv: kv[1]['flow_efficiency_pct'], reverse=False)
     min_sizing_accuracy_pct = sorted(issues.items(), key=lambda kv: kv[1]['sizing_accuracy_pct'], reverse=False)
-
-
+    #
+    #
     # log.debug(json.dumps(min_flow_efficiency_pct, indent=4))
     # print("------------------------------------------------")
     # log.debug(json.dumps(min_sizing_accuracy_pct, indent=4))

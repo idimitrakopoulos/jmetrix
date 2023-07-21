@@ -266,18 +266,29 @@ def get_time_in_initial_status(status, changelog, created):
     in_time = parse(created)
     result = []
 
-    # log.debug("Getting time for initial status {} created on {}".format(status, created))
-
+    log.debug("Getting time for initial status {} created on {}".format(status, created))
     for history in changelog.histories:
         for item in history.items:
             if item.field == 'status':
                 out_time = parse(history.created)
-                # log.debug("Found  " + item.toString + " on  " + history.created)
+                log.debug("Found " + item.toString + " on  " + history.created)
                 result.append(calc_working_seconds(in_time, out_time))
-                # log.debug("get_time_in_initial_status {} = {} sec (working: {} actual: {})".format(status, result[len(result)-1], datetime.timedelta(seconds=result[len(result)-1]), str(out_time-in_time)))
+                log.debug("get_time_in_initial_status {} = {} sec (working: {} actual: {})".format(status, result[
+                    len(result) - 1], datetime.timedelta(seconds=result[len(result) - 1]), str(out_time - in_time)))
                 # Initial status may be obtained in later phases of the ticket lifecycle so we want to capture them too
                 result.extend(get_time_in_status(status, changelog))
                 return result
+
+    # If no result it means that jira doesnt have a history for it so force it
+    if not result:
+        print("d")
+        timezone_offset = 0.0  # UTC
+        tzinfo = timezone(timedelta(hours=timezone_offset))
+        out_time = datetime.datetime.now(tzinfo)
+        result.append(calc_working_seconds(in_time, out_time))
+    # ipdb.set_trace()
+    return result
+
 
 
 def get_time_in_current_status(status, changelog):
@@ -327,13 +338,21 @@ def get_duration_in_current_status(status, changelog):
     return result
 
 # @debug
-def jql_results_amount(jira, jql):
-    # Run JQL query
-    jql_exec = run_jql(jira, jql, False, True)
-    return len(jql_exec)
+# def jql_results_amount(jira, jql):
+#     # Run JQL query
+#     jql_exec = run_jql(jira, jql, False, True)
+#     return len(jql_exec)
 
-def seconds_to_hours(sec):
-    return sec/3600
+def group_issues_by_assignee(issues):
+    import collections
+    grouped_dict = collections.defaultdict(list)
+    for key, value in issues.items():
+        assignee = value['fields']['assignee']
+        grouped_dict[assignee].append(value)
+    return grouped_dict
+
+def seconds_to_hours(seconds, rounding=2):
+    return round(seconds/3600, rounding)
 
 
 def fancy_print_issue_summary(issues, title=""):
@@ -485,13 +504,3 @@ def fancy_print_jql_info(aggregates, title=""):
 #     else:
 #         log.debug("No issues to print.")
 
-def group_issues_by_assignee(issues):
-    import collections
-    grouped_dict = collections.defaultdict(list)
-    for key, value in issues.items():
-        assignee = value['fields']['assignee']
-        grouped_dict[assignee].append(value)
-    return grouped_dict
-
-def seconds_to_hours(seconds):
-    return round(seconds/3600, 2)
