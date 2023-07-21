@@ -136,7 +136,8 @@ def calc_working_seconds(from_date, to_date):
 def get_time_between_extreme_statuses(from_status, to_status, changelog):
     in_time = ""
     out_time = ""
-    result = 0
+    result = {'worktime': 0, 'duration': 0}
+
     # log.debug("Getting time between first occurrence of {} -> last occurrence of {}".format(from_status, to_status))
     # Search for newest occurrence of needed status
     for history in changelog.histories:
@@ -157,29 +158,32 @@ def get_time_between_extreme_statuses(from_status, to_status, changelog):
                     if item.toString == to_status and not out_time:
                         # log.debug("Found {} on {}".format(to_status, str(history.created)))
                         out_time = parse(history.created)
-                        result = calc_working_seconds(in_time, out_time)
-                        log.debug("get_time_between_extreme_statuses {} -> {} = {} sec (workhours: {} duration: {})".format(from_status, to_status, result,
-                                                                                      datetime.timedelta(seconds=result),
-                                                                                      str(out_time - in_time)))
+                        result['worktime'] = calc_working_seconds(in_time, out_time)
+                        result['duration'] = (out_time - in_time).total_seconds()
+                        # log.debug("get_time_between_extreme_statuses {} -> {} = {} sec (workhours: {} duration: {})".format(from_status, to_status, result,
+                        #                                                               datetime.timedelta(seconds=result),
+                        #                                                               str(out_time - in_time)))
     return result
 
 # @debug
 def get_time_from_creation_to_extreme_status(created, to_status, changelog):
     in_time = parse(created)
     out_time = ""
-    result = 0
+    result = {'worktime': 0, 'duration': 0}
 
     # log.debug("Getting time between issue creation -> last occurrence of {}".format(to_status))
     # log.debug("Found Issue creation on {}".format(in_time))
     # Search for oldest occurrence of needed status
+    # ipdb.set_trace()
     for history in changelog.histories:
         for item in history.items:
             if item.field == 'status':
                 if item.toString == to_status and not out_time:
                     out_time = parse(history.created)
                     # log.debug("Found {} on {}".format(to_status, out_time))
-                    result = calc_working_seconds(in_time, out_time)
-                    log.debug("get_time_from_creation_to_extreme_status {} = {} sec (workhours: {} duration: {})".format(to_status, result, datetime.timedelta(seconds=result), str(out_time - in_time)))
+                    result['worktime'] = calc_working_seconds(in_time, out_time)
+                    result['duration'] = (out_time - in_time).total_seconds()
+                    # log.debug("get_time_from_creation_to_extreme_status {} = {} sec (workhours: {} duration: {})".format(to_status, result, datetime.timedelta(seconds=result), str(out_time - in_time)))
 
     return result
 
@@ -187,7 +191,7 @@ def get_time_from_creation_to_extreme_status(created, to_status, changelog):
 def get_time_between_distant_statuses(from_status, to_status, changelog):
     in_flag = False
     in_time = ""
-    result = 0
+    result = {'worktime': 0, 'duration': 0}
 
     # log.debug("Getting time between {} -> {}".format(from_status, to_status))
 
@@ -202,7 +206,8 @@ def get_time_between_distant_statuses(from_status, to_status, changelog):
                     in_flag = False
                     out_time = parse(history.created)
                     # log.debug("Found  " + item.toString + " on  " + history.created)
-                    result = calc_working_seconds(in_time, out_time)
+                    result['worktime'] = calc_working_seconds(in_time, out_time)
+                    result['duration'] = (out_time - in_time).total_seconds()
 
                     # log.debug("get_time_between_statuses {} -> {} = {} sec (working: {} actual: {})".format(from_status, to_status, result[len(result)-1], datetime.timedelta(seconds=result[len(result)-1]), str(out_time-in_time)))
 
@@ -238,7 +243,7 @@ def get_time_between_distant_statuses(from_status, to_status, changelog):
 def get_time_in_status(status, changelog):
     in_flag = False
     in_time = ""
-    result = []
+    result = {'worktime': 0, 'duration': 0}
 
     # log.debug("Getting time for status {}".format(status))
 
@@ -255,37 +260,38 @@ def get_time_in_status(status, changelog):
                     in_flag = False
                     out_time = parse(history.created)
                     # log.debug("Found  " + item.toString + " on  " + history.created)
-                    result.append(calc_working_seconds(in_time, out_time))
+                    result['worktime'] = calc_working_seconds(in_time, out_time)
+                    result['duration'] = (out_time - in_time).total_seconds()
                     # log.debug("get_time_in_status {} = {} sec (workhours: {} duration: {})".format(status, result[len(result)-1], datetime.timedelta(seconds=result[len(result)-1]), str(out_time-in_time)))
-
+                    return result
     return result
 
 
 # @debug
 def get_time_in_initial_status(status, changelog, created):
     in_time = parse(created)
-    result = []
+    result = {}
 
-    log.debug("Getting time for initial status {} created on {}".format(status, created))
+    # log.debug("Getting time for initial status {} created on {}".format(status, created))
     for history in changelog.histories:
         for item in history.items:
             if item.field == 'status':
                 out_time = parse(history.created)
-                log.debug("Found " + item.toString + " on  " + history.created)
-                result.append(calc_working_seconds(in_time, out_time))
-                log.debug("get_time_in_initial_status {} = {} sec (working: {} actual: {})".format(status, result[
-                    len(result) - 1], datetime.timedelta(seconds=result[len(result) - 1]), str(out_time - in_time)))
-                # Initial status may be obtained in later phases of the ticket lifecycle so we want to capture them too
-                result.extend(get_time_in_status(status, changelog))
+                # log.debug("Found " + item.toString + " on  " + history.created)
+                result['worktime'] = calc_working_seconds(in_time, out_time)
+                result['duration'] = (out_time - in_time).total_seconds()
+
+                # log.debug("get_time_in_initial_status {} = {} sec (working: {} actual: {})".format(status, result[len(result) - 1], datetime.timedelta(seconds=result[len(result) - 1]), str(out_time - in_time)))
                 return result
 
     # If no result it means that jira doesnt have a history for it so force it
     if not result:
-        print("d")
         timezone_offset = 0.0  # UTC
         tzinfo = timezone(timedelta(hours=timezone_offset))
         out_time = datetime.datetime.now(tzinfo)
-        result.append(calc_working_seconds(in_time, out_time))
+        result['worktime'] = calc_working_seconds(in_time, out_time)
+        result['duration'] = (out_time - in_time).total_seconds()
+
     # ipdb.set_trace()
     return result
 
@@ -294,7 +300,7 @@ def get_time_in_initial_status(status, changelog, created):
 def get_time_in_current_status(status, changelog):
     in_flag = False
     in_time = ""
-    result = []
+    result = {'worktime': 0, 'duration': 0}
 
     # log.debug("Getting time in current status {} ".format(status))
 
@@ -309,39 +315,12 @@ def get_time_in_current_status(status, changelog):
                     timezone_offset = 0.0  # UTC
                     tzinfo = timezone(timedelta(hours=timezone_offset))
                     out_time = datetime.datetime.now(tzinfo)
-                    result.append(calc_working_seconds(in_time, out_time))
+                    result['worktime'] = calc_working_seconds(in_time, out_time)
+                    result['duration'] = (out_time - in_time).total_seconds()
                     # log.debug("get_time_in_current_status {} = {} sec (workhours: {} duration: {})".format(status, result[len(result)-1], datetime.timedelta(seconds=result[len(result)-1]), str(out_time-in_time)))
+                    return result
 
     return result
-
-
-def get_duration_in_current_status(status, changelog):
-    in_flag = False
-    in_time = ""
-    result = None
-
-    # log.debug("Getting time in current status {} ".format(status))
-
-    for history in changelog.histories:
-        for item in history.items:
-            if item.field == 'status':
-                if item.toString == status and not in_flag:
-                    in_flag = True
-                    # log.debug("Found  " + item.toString + " on " + history.created)
-                    in_time = parse(history.created)
-                    tzinfo = timezone.utc
-                    out_time = datetime.datetime.now(tzinfo)
-                    # print(str(type(in_time)))
-                    # print(str(type(out_time)))
-                    result = (out_time - in_time)
-
-    return result
-
-# @debug
-# def jql_results_amount(jira, jql):
-#     # Run JQL query
-#     jql_exec = run_jql(jira, jql, False, True)
-#     return len(jql_exec)
 
 def group_issues_by_assignee(issues):
     import collections
@@ -430,7 +409,7 @@ def fancy_print_issue_timings(issues, title=""):
         table.add_column("Duration in status (h)", justify="left", style="white")
         table.add_column("Original Estimation (h)", justify="left", style="white")
         table.add_column("Actual Workhours (h)", justify="left", style="white")
-        table.add_column("Overdue %", justify="left", style="white")
+        table.add_column("Consumed %", justify="left", style="white")
 
         for issue in issues:
             # ipdb.set_trace()
@@ -440,11 +419,11 @@ def fancy_print_issue_timings(issues, title=""):
                           "Unassigned" if isinstance(issues[issue]['fields']['assignee'], type(None)) else issues[issue]['fields']['assignee'],
                           ', '.join(map(str, issues[issue]['fields']['labels'])),
                           issues[issue]['fields']['status'],
-                          str(seconds_to_hours(issues[issue]['t_current_status'])),
-                          str(seconds_to_hours(issues[issue]['d_current_status'])),
+                          str(seconds_to_hours(issues[issue]['t_current_status']['worktime'])),
+                          str(seconds_to_hours(issues[issue]['t_current_status']['duration'])),
                           "-" if isinstance(issues[issue]['fields']['original_estimate'], type(None)) else str(seconds_to_hours(issues[issue]['fields']['original_estimate'])),
-                          str(seconds_to_hours(issues[issue]['t_actual'])),
-                          "{}%".format(str(round(issues[issue]['pct_overdue'], 2))))
+                          str(seconds_to_hours(issues[issue]['t_overall']['worktime'])),
+                          "{}%".format(str(round(issues[issue]['pct_consumed'], 2))) if issues[issue]['pct_consumed'] >= 0 else "n/a")
 
         console = Console()
         console.print(table)

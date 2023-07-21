@@ -2,7 +2,7 @@ import logging
 log = logging.getLogger('root')
 from util.jql import JQLs, Filters, Status
 from util.toolkit import jira_token_authenticate, run_jql, fancy_print_issue_timings, get_time_in_current_status, \
-    get_duration_in_current_status, get_time_between_distant_statuses, group_issues_by_assignee, seconds_to_hours
+    get_time_between_distant_statuses, group_issues_by_assignee, seconds_to_hours
 import ipdb, json
 
 def exec(args):
@@ -41,16 +41,15 @@ def exec(args):
         issues[issue.key]['fields']['labels'] = issue.fields.labels
         issues[issue.key]['fields']['original_estimate'] = issue.fields.timeoriginalestimate
 
-        issues[issue.key]['t_current_status'] = sum(get_time_in_current_status(issues[issue.key]['fields']['status'], issue.changelog))
-        issues[issue.key]['d_current_status'] = get_duration_in_current_status(issues[issue.key]['fields']['status'], issue.changelog).total_seconds()
-        issues[issue.key]['t_actual'] = sum(get_time_in_current_status(issues[issue.key]['fields']['status'], issue.changelog)) if Status.IN_PROGRESS.value == issue.fields.status.name else get_time_between_distant_statuses(Status.IN_PROGRESS.value, issue.fields.status.name, issue.changelog)
-        issues[issue.key]['pct_overdue'] = 0 if isinstance(issues[issue.key]['fields']['original_estimate'], type(None)) else ((issues[issue.key]['t_actual'] - issues[issue.key]['fields']['original_estimate'])/issues[issue.key]['fields']['original_estimate'])*100
+        issues[issue.key]['t_current_status'] = get_time_in_current_status(issues[issue.key]['fields']['status'], issue.changelog)
+        issues[issue.key]['t_overall'] = get_time_in_current_status(issues[issue.key]['fields']['status'], issue.changelog) if Status.IN_PROGRESS.value == issue.fields.status.name else get_time_between_distant_statuses(Status.IN_PROGRESS.value, issue.fields.status.name, issue.changelog)
+        issues[issue.key]['pct_consumed'] = -1 if isinstance(issues[issue.key]['fields']['original_estimate'], type(None)) else (issues[issue.key]['t_overall']['worktime'] / issues[issue.key]['fields']['original_estimate'])*100
 
 
     # log.debug(json.dumps(issues, indent=4))
 
-    max_t_in_same_status = sorted(issues.items(), key=lambda kv: kv[1]['t_current_status'], reverse=True)
-    max_pct_overdue = sorted(issues.items(), key=lambda kv: kv[1]['pct_overdue'], reverse=True)
+    max_t_in_same_status = sorted(issues.items(), key=lambda kv: kv[1]['t_current_status']['worktime'], reverse=True)
+    # max_pct_overdue = sorted(issues.items(), key=lambda kv: kv[1]['pct_overdue'], reverse=True)
 
     # fancy_print_issue_assignees(group_issues_by_assignee(issues))
     fancy_print_issue_timings(issues, jql_project_delivery_in_flight)
@@ -60,8 +59,8 @@ def exec(args):
       for issue in issues:
         if (assignee is None and not issue['fields']['status'].startswith("Ready")) \
                 or assignee is not None and issue['fields']['status'].startswith("Ready"):
-            print("  * {} | {} | {}h".format(issue['key'], issue['fields']['status'], seconds_to_hours(issue['t_current_status'])))
+            print("  * {} | {} | {}h".format(issue['key'], issue['fields']['status'], seconds_to_hours(issue['t_current_status']['worktime'])))
         else:
-            print("    {} | {} | {}h".format(issue['key'], issue['fields']['status'], seconds_to_hours(issue['t_current_status'])))
+            print("    {} | {} | {}h".format(issue['key'], issue['fields']['status'], seconds_to_hours(issue['t_current_status']['worktime'])))
 
 
