@@ -114,5 +114,3 @@ def exec(args):
     # print("------------------------------------------------")
     # log.debug(json.dumps(min_sizing_accuracy_pct, indent=4))
 
-    # ipdb.set_trace()
-
