@@ -90,8 +90,7 @@ def exec(args):
     max_t_in_same_status = sorted(issues.items(), key=lambda kv: kv[1]['t_current_status'], reverse=True)
     min_flow_efficiency_pct = sorted(issues.items(), key=lambda kv: kv[1]['flow_efficiency_pct'], reverse=False)
     min_sizing_accuracy_pct = sorted(issues.items(), key=lambda kv: kv[1]['sizing_accuracy_pct'], reverse=False)
-    #
-    #
+
     # log.debug(json.dumps(min_flow_efficiency_pct, indent=4))
     # print("------------------------------------------------")
     # log.debug(json.dumps(min_sizing_accuracy_pct, indent=4))
