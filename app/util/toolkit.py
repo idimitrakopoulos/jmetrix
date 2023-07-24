@@ -243,6 +243,7 @@ def get_time_between_distant_statuses(from_status, to_status, changelog):
 def get_time_in_status(status, changelog):
     in_flag = False
     in_time = ""
+    out_time = ""
     result = {'worktime': 0, 'duration': 0}
 
     # log.debug("Getting time for status {}".format(status))
@@ -250,20 +251,29 @@ def get_time_in_status(status, changelog):
     for history in changelog.histories:
         for item in history.items:
             if item.field == 'status':
-                # print(item.toString)
+                print(item.field + " " + item.fromString + "->" + item.toString)
                 if item.toString == status and not in_flag:
                     in_flag = True
                     in_time = parse(history.created)
-                    # log.debug("Found  " + item.toString + " on  " + history.created)
+                    log.debug("Found " + item.toString + " on  " + history.created)
                     continue
                 elif in_flag:
                     in_flag = False
                     out_time = parse(history.created)
-                    # log.debug("Found  " + item.toString + " on  " + history.created)
+                    log.debug("Found " + item.toString + " on  " + history.created)
                     result['worktime'] = calc_working_seconds(in_time, out_time)
                     result['duration'] = (out_time - in_time).total_seconds()
                     # log.debug("get_time_in_status {} = {} sec (workhours: {} duration: {})".format(status, result[len(result)-1], datetime.timedelta(seconds=result[len(result)-1]), str(out_time-in_time)))
                     return result
+
+    # If out_time isnt found then the issue is currently being worked on this status so set the end date/time as the current date/time and return it
+    if in_time and out_time == "":
+        timezone_offset = 0.0  # UTC
+        tzinfo = timezone(timedelta(hours=timezone_offset))
+        out_time = datetime.datetime.now(tzinfo)
+        result['worktime'] = calc_working_seconds(in_time, out_time)
+        result['duration'] = (out_time - in_time).total_seconds()
+
     return result
 
 
@@ -421,7 +431,7 @@ def fancy_print_issue_timings(issues, title=""):
                           issues[issue]['fields']['status'],
                           str(seconds_to_hours(issues[issue]['t_current_status']['worktime'])),
                           str(seconds_to_hours(issues[issue]['t_current_status']['duration'])),
-                          "-" if isinstance(issues[issue]['fields']['original_estimate'], type(None)) else str(seconds_to_hours(issues[issue]['fields']['original_estimate'])),
+                          "n/a" if isinstance(issues[issue]['fields']['original_estimate'], type(None)) else str(seconds_to_hours(issues[issue]['fields']['original_estimate'])),
                           str(seconds_to_hours(issues[issue]['t_overall']['worktime'])),
                           "{}%".format(str(round(issues[issue]['pct_consumed'], 2))) if issues[issue]['pct_consumed'] >= 0 else "n/a")
 
