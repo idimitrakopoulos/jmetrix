@@ -73,7 +73,6 @@ def exec(args):
         fancy_print_issue_timings(discovery_issue_metrics, jql_project_discovery_in_flight)
         print_daily_assignee_status(discovery_issue_metrics)
 
-
     # log.debug(json.dumps(issues, indent=4))
 
     # max_t_in_same_status = sorted(issues.items(), key=lambda kv: kv[1]['t_current_status']['worktime'], reverse=True)
