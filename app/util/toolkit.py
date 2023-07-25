@@ -191,6 +191,8 @@ def get_time_from_creation_to_extreme_status(created, to_status, changelog):
 def get_time_between_distant_statuses(from_status, to_status, changelog):
     in_flag = False
     in_time = ""
+    out_time = ""
+
     result = {'worktime': 0, 'duration': 0}
 
     # log.debug("Getting time between {} -> {}".format(from_status, to_status))
@@ -198,46 +200,31 @@ def get_time_between_distant_statuses(from_status, to_status, changelog):
     for history in changelog.histories:
         for item in history.items:
             if item.field == 'status':
-                if item.toString == from_status and not in_flag:
+                if item.fromString == from_status and not in_flag:
                     in_flag = True
                     in_time = parse(history.created)
-                    # log.debug("Found  " + item.toString + " on  " + history.created)
+                    # log.debug("{} -> {} on {}".format(item.fromString, item.toString, in_time))
                 elif item.toString == to_status and in_flag:
                     in_flag = False
                     out_time = parse(history.created)
-                    # log.debug("Found  " + item.toString + " on  " + history.created)
                     result['worktime'] = calc_working_seconds(in_time, out_time)
                     result['duration'] = (out_time - in_time).total_seconds()
-
-                    # log.debug("get_time_between_statuses {} -> {} = {} sec (working: {} actual: {})".format(from_status, to_status, result[len(result)-1], datetime.timedelta(seconds=result[len(result)-1]), str(out_time-in_time)))
+                    # log.debug("{} -> {} on {}".format(item.fromString, item.toString, out_time))
 
     return result
 
+def get_time_from_creation_to_now(created):
+    in_time = parse(created)
+    out_time = ""
+    timezone_offset = 0.0  # UTC
+    tzinfo = timezone(timedelta(hours=timezone_offset))
+    out_time = datetime.datetime.now(tzinfo)
+    result = {'worktime': 0, 'duration': 0}
 
-# def get_time_between_adjacent_statuses(from_status, to_status, changelog):
-#     in_flag = False
-#     in_time = ""
-#     result = []
-#
-#     # log.debug("Getting time between {} -> {}".format(from_status, to_status))
-#
-#     for history in reversed(changelog.histories):
-#         for item in history.items:
-#             if item.field == 'status':
-#                 if item.toString == from_status and not in_flag:
-#                     in_flag = True
-#                     in_time = parse(history.created)
-#                     # log.debug("Found  " + item.toString + " on  " + history.created)
-#                     continue
-#                 elif in_flag:
-#                     in_flag = False
-#                     if item.toString == to_status:
-#                         out_time = parse(history.created)
-#                         # log.debug("Found  " + item.toString + " on  " + history.created)
-#                         result.append(calc_working_seconds(in_time, out_time))
-#                         # log.debug("get_time_between_statuses {} -> {} = {} sec (working: {} actual: {})".format(from_status, to_status, result[len(result)-1], datetime.timedelta(seconds=result[len(result)-1]), str(out_time-in_time)))
-#
-#     return result
+    result['worktime'] = calc_working_seconds(in_time, out_time)
+    result['duration'] = (out_time - in_time).total_seconds()
+
+    return result
 
 # @debug
 def get_time_in_status(status, changelog):
@@ -251,16 +238,16 @@ def get_time_in_status(status, changelog):
     for history in changelog.histories:
         for item in history.items:
             if item.field == 'status':
-                print(item.field + " " + item.fromString + "->" + item.toString)
+                # print(item.field + " " + item.fromString + "->" + item.toString)
                 if item.toString == status and not in_flag:
                     in_flag = True
                     in_time = parse(history.created)
-                    log.debug("Found " + item.toString + " on  " + history.created)
+                    # log.debug("Found " + item.toString + " on  " + history.created)
                     continue
                 elif in_flag:
                     in_flag = False
                     out_time = parse(history.created)
-                    log.debug("Found " + item.toString + " on  " + history.created)
+                    # log.debug("Found " + item.toString + " on  " + history.created)
                     result['worktime'] = calc_working_seconds(in_time, out_time)
                     result['duration'] = (out_time - in_time).total_seconds()
                     # log.debug("get_time_in_status {} = {} sec (workhours: {} duration: {})".format(status, result[len(result)-1], datetime.timedelta(seconds=result[len(result)-1]), str(out_time-in_time)))
@@ -493,3 +480,16 @@ def fancy_print_jql_info(aggregates, title=""):
 #     else:
 #         log.debug("No issues to print.")
 
+def add_worktimes_and_durations(counters):
+    from collections import Counter
+    result = Counter()
+    for c in counters:
+        result = result + c
+
+    if not result['worktime']:
+        result['worktime'] = 0
+
+    if not result['duration']:
+        result['duration'] = 0
+
+    return dict(result)

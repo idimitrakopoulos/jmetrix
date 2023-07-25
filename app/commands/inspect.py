@@ -5,16 +5,13 @@ from collections import Counter
 import ipdb, json
 from operator import itemgetter
 from util.toolkit import jira_token_authenticate, get_time_in_status, get_time_from_creation_to_extreme_status, \
-    get_time_between_extreme_statuses, get_time_in_initial_status, get_time_in_current_status, run_jql
+    get_time_between_extreme_statuses, get_time_in_initial_status, get_time_in_current_status, run_jql, \
+    get_time_from_creation_to_now, seconds_to_hours, add_worktimes_and_durations
 
 def exec(args):
 
     # Connect to Jira instance
     jira = jira_token_authenticate(args.jira_server_url, args.jira_auth_token)
-
-    # JQL append required filters for this command to work
-    # jql = "{} AND status in ({},{})".format(args.jira_jql, Status.DONE.value, Status.CLOSED.value)
-    # log.info("Executing JQL after modification '{}'".format(jql))
 
     # Execute JQL
     jql_results = run_jql(jira, args.jira_jql)
@@ -22,6 +19,20 @@ def exec(args):
     if len(jql_results) == 0:
         log.info("Exiting as there are zero results to process")
         exit(0)
+
+    from rich.console import Console
+    from rich.table import Table
+
+    table = Table(title=args.jira_jql)
+
+    table.add_column("Key", justify="left", style="bright_yellow", no_wrap=True)
+    table.add_column("Status", justify="left", style="white", no_wrap=True)
+    table.add_column("Est(h)", justify="left", style="white")
+    table.add_column("Anal", justify="left", style="white")
+    table.add_column("UXD", justify="left", style="white")
+    table.add_column("TRev", justify="left", style="white")
+    table.add_column("Dev", justify="left", style="white")
+    table.add_column("Test", justify="left", style="white")
 
     issues = dict()
 
@@ -61,6 +72,7 @@ def exec(args):
         issues[issue.key]['t_ready_for_sign_off'] = get_time_in_status(Status.READY_FOR_SIGN_OFF.value, issue.changelog)
         issues[issue.key]['t_done'] = get_time_in_status(Status.DONE.value, issue.changelog)
         issues[issue.key]['t_current_status'] = get_time_in_current_status(issues[issue.key]['fields']['status'], issue.changelog)
+        issues[issue.key]['t_overall'] = get_time_from_creation_to_now(issue.fields.created)
 
         # Flow Efficiency = (Hands-on time / Total lead-time) * 100
         t_idle = [issues[issue.key]['t_ready_for_analysis']['duration'],
@@ -77,30 +89,45 @@ def exec(args):
         issues[issue.key]['aggregates']['t_lead'] = get_time_from_creation_to_extreme_status(issue.fields.created, Status.DONE.value, issue.changelog)
         issues[issue.key]['aggregates']['t_cycle'] = get_time_between_extreme_statuses(Status.READY_TO_START.value, Status.DONE.value, issue.changelog)
 
-        issues[issue.key]['aggregates']['t_discovery_analysis'] = dict(Counter(issues[issue.key]['t_ready_for_analysis']) +
-                                                                   Counter(issues[issue.key]['t_in_analysis']))
+        issues[issue.key]['aggregates']['t_discovery_analysis'] = add_worktimes_and_durations([Counter(issues[issue.key]['t_ready_for_analysis']),
+                                                                   Counter(issues[issue.key]['t_in_analysis'])])
 
-        issues[issue.key]['aggregates']['t_discovery_uxd'] = dict(Counter(issues[issue.key]['t_ready_for_uxd']) +
-                                                              Counter(issues[issue.key]['t_in_uxd']))
+        issues[issue.key]['aggregates']['t_discovery_uxd'] = add_worktimes_and_durations([Counter(issues[issue.key]['t_ready_for_uxd']),
+                                                              Counter(issues[issue.key]['t_in_uxd'])])
 
-        issues[issue.key]['aggregates']['t_discovery_tech_review'] = dict(Counter(issues[issue.key]['t_ready_for_tech_review']) +
-                                                                      Counter(issues[issue.key]['t_in_tech_review']) +
-                                                                      Counter(issues[issue.key]['t_ready_for_refinement']) +
-                                                                      Counter(issues[issue.key]['t_in_refinement']))
+        issues[issue.key]['aggregates']['t_discovery_tech_review'] = add_worktimes_and_durations([Counter(issues[issue.key]['t_ready_for_tech_review']),
+                                                                      Counter(issues[issue.key]['t_in_tech_review']),
+                                                                      Counter(issues[issue.key]['t_ready_for_refinement']),
+                                                                      Counter(issues[issue.key]['t_in_refinement'])])
 
-        issues[issue.key]['aggregates']['t_delivery_dev'] = dict(Counter(issues[issue.key]['t_in_progress']) +
-                                                                 Counter(issues[issue.key]['t_ready_for_code_review']) +
-                                                                 Counter(issues[issue.key]['t_in_code_review']))
+        issues[issue.key]['aggregates']['t_delivery_dev'] = add_worktimes_and_durations([Counter(issues[issue.key]['t_in_progress']),
+                                                                 Counter(issues[issue.key]['t_ready_for_code_review']),
+                                                                 Counter(issues[issue.key]['t_in_code_review'])])
 
-        issues[issue.key]['aggregates']['t_delivery_test'] = dict(Counter(issues[issue.key]['t_ready_for_testing']) +
-                                                                 Counter(issues[issue.key]['t_in_testing']) +
-                                                                 Counter(issues[issue.key]['t_ready_for_sign_off']))
+        issues[issue.key]['aggregates']['t_delivery_test'] = add_worktimes_and_durations([Counter(issues[issue.key]['t_ready_for_testing']),
+                                                                 Counter(issues[issue.key]['t_in_testing']),
+                                                                 Counter(issues[issue.key]['t_ready_for_sign_off'])])
 
         # If lead time is zero then the issue was worked off normal working hours so it should be counted as efficient
         issues[issue.key]['flow_efficiency_pct'] = round(((issues[issue.key]['aggregates']['t_lead']['duration'] - sum(t_idle)) / issues[issue.key]['aggregates']['t_lead']['duration']) * 100 if issues[issue.key]['aggregates']['t_lead']['duration'] else -1, 2)
 
         # Sizing Efficiency = (Size estimated / cycle time) * 100
         issues[issue.key]['sizing_accuracy_pct'] = round((issues[issue.key]['fields']['original_estimate'] / issues[issue.key]['aggregates']['t_cycle']['worktime']) * 100 if issues[issue.key]['fields']['original_estimate'] and issues[issue.key]['aggregates']['t_cycle']['worktime'] else -1, 2)
+
+        if issues[issue.key]['fields']['original_estimate']:
+            table.add_row(issue.key,
+                          issues[issue.key]['fields']['status'],
+                          "{}h".format(str(seconds_to_hours(issues[issue.key]['fields']['original_estimate']))),
+                          "0%" if not issues[issue.key]['aggregates']['t_discovery_analysis'] else "{}%".format(str(round((issues[issue.key]['aggregates']['t_discovery_analysis']['worktime']/issues[issue.key]['t_overall']['worktime'])*100, 2))),
+                          "0%" if not issues[issue.key]['aggregates']['t_discovery_uxd'] else "{}%".format(str(round((issues[issue.key]['aggregates']['t_discovery_uxd']['worktime']/issues[issue.key]['t_overall']['worktime'])*100, 2))),
+                          "0%" if not issues[issue.key]['aggregates']['t_discovery_tech_review'] else "{}%".format(str(round((issues[issue.key]['aggregates']['t_discovery_tech_review']['worktime']/issues[issue.key]['t_overall']['worktime'])*100, 2))),
+                          "0%" if not issues[issue.key]['aggregates']['t_delivery_dev'] else "{}%".format(str(round((issues[issue.key]['aggregates']['t_delivery_dev']['worktime']/issues[issue.key]['t_overall']['worktime'])*100, 2))),
+                          "0%" if not issues[issue.key]['aggregates']['t_delivery_test'] else "{}%".format(str(round((issues[issue.key]['aggregates']['t_delivery_test']['worktime']/issues[issue.key]['t_overall']['worktime'])*100, 2))),
+                          )
+
+        else:
+            table.add_row(issue.key, issues[issue.key]['fields']['status'], "n/a",  "-%", "-%", "-%", "-%", "-%")
+
 
         log.debug(json.dumps(issues[issue.key], indent=4))
 
@@ -113,3 +140,7 @@ def exec(args):
     # log.debug(json.dumps(min_flow_efficiency_pct, indent=4))
     # print("------------------------------------------------")
     # log.debug(json.dumps(min_sizing_accuracy_pct, indent=4))
+
+
+    console = Console()
+    console.print(table)
