@@ -51,7 +51,6 @@ def exec(args):
     # Connect to Jira instance
     jira = jira_token_authenticate(args.jira_server_url, args.jira_auth_token)
 
-
     # Add project to JQL
     jql_project = JQLs.JQL_PROJECT.value.format(args.jira_project)
 
@@ -59,7 +58,7 @@ def exec(args):
     jql_project_delivery_in_flight = "{} {}".format(jql_project, Filters.DELIVERY_IN_FLIGHT.value)
     delivery_issues_in_flight = run_jql(jira, jql_project_delivery_in_flight)
     delivery_issue_metrics = get_daily_metrics(delivery_issues_in_flight)
-
+    # Output
     print_header("Delivery board items")
     fancy_print_issue_timings(delivery_issue_metrics, jql_project_delivery_in_flight)
     print_daily_assignee_status(delivery_issue_metrics)
@@ -69,7 +68,7 @@ def exec(args):
         jql_project_discovery_in_flight = "{} {}".format(jql_project, Filters.DISCOVERY_IN_FLIGHT.value)
         discovery_issues_in_flight = run_jql(jira, jql_project_discovery_in_flight)
         discovery_issue_metrics = get_daily_metrics(discovery_issues_in_flight)
-
+        # Output
         print_header("Discovery board items")
         fancy_print_issue_timings(discovery_issue_metrics, jql_project_discovery_in_flight)
         print_daily_assignee_status(discovery_issue_metrics)
