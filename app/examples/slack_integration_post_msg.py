@@ -8,7 +8,7 @@ slack_token = os.environ["SLACK_BOT_TOKEN"]
 
 client = WebClient(token=slack_token)
 
-
+# test method
 def post_to_slack(slack_message, slack_channel):
     try:
         client.chat_postMessage(
