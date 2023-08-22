@@ -144,3 +144,4 @@ def exec(args):
 
     console = Console()
     console.print(table)
+
