@@ -9,6 +9,10 @@ import shlex
 log = logger.setup_custom_logger('root', logging.DEBUG)
 app = Flask(__name__)
 
+@app.route('/health', methods=['GET'])
+def health():
+    return 'OK'
+
 @app.route('/daily_rpt', methods=['GET'])
 def run_daily_rpt():
     url = shlex.quote(request.args.get('url'))
