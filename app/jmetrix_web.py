@@ -4,16 +4,17 @@ import subprocess
 import os
 import logging
 import util.logger as logger
+import shlex
 
 log = logger.setup_custom_logger('root', logging.DEBUG)
 app = Flask(__name__)
 
 @app.route('/daily_rpt', methods=['GET'])
 def run_daily_rpt():
-    url = request.args.get('url')
-    token = request.args.get('token')
-    project = request.args.get('project')
-    discovery = request.args.get('discovery')
+    url = shlex.quote(request.args.get('url'))
+    token = shlex.quote(request.args.get('token'))
+    project = shlex.quote(request.args.get('project'))
+    discovery = shlex.quote(request.args.get('discovery'))
 
     # Run the Python script using subprocess
     if discovery is not None:
@@ -29,13 +30,13 @@ def run_daily_rpt():
 
 @app.route('/swimlane_rpt', methods=['GET'])
 def run_swimlane_rpt():
-    url = request.args.get('url')
-    token = request.args.get('token')
-    project = request.args.get('project')
-    date_from = request.args.get('date_from')
-    date_to = request.args.get('date_to')
-    jira_label = request.args.get('jira_label')
-    extra_jira_label = request.args.get('extra_jira_label')
+    url = shlex.quote(request.args.get('url'))
+    token = shlex.quote(request.args.get('token'))
+    project = shlex.quote(request.args.get('project'))
+    date_from = shlex.quote(request.args.get('date_from'))
+    date_to = shlex.quote(request.args.get('date_to'))
+    jira_label = shlex.quote(request.args.get('jira_label'))
+    extra_jira_label = shlex.quote(request.args.get('extra_jira_label'))
 
     # Run the Python script using subprocess
     if extra_jira_label is not None:

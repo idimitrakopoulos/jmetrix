@@ -45,6 +45,7 @@ class Filters(StrValueEnum):
     NOT_CREATED_DATES_FROM_TO = "AND NOT created >= '{} 00:00'"
     RESOLVED_DATES_FROM_TO = "AND resolved >= '{} 00:00' AND resolved <= '{} 23:59'"
     LABEL = "AND labels IN ({})"
+    NOT_DEPENDENCY_LABEL = "AND labels NOT IN ('Dependency')"
     RELEASED = "AND status IN (Done, Closed) AND Resolution NOT IN (Rejected)"
     REJECTED = "AND status IN (Done, Closed) AND Resolution IN (Rejected)"
     IN_FLIGHT = "AND status NOT IN (Done, Closed)"

@@ -43,7 +43,7 @@ def exec(args):
     jql_project = JQLs.JQL_PROJECT.value.format(args.jira_project)
 
     # Add identifier to JQL
-    jql_project_identifier = "{} {}".format(jql_project, Filters.LABEL.value.format(args.jira_label))
+    jql_project_identifier = "{} {} {}".format(jql_project, Filters.LABEL.value.format(args.jira_label), Filters.NOT_DEPENDENCY_LABEL.value)
     if (args.jira_extra_label):
         jql_project_identifier = "{} {}".format(jql_project_identifier, Filters.LABEL.value.format(args.jira_extra_label))
 
