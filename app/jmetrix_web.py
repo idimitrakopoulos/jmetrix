@@ -17,6 +17,10 @@ def run_daily_rpt():
     url = request.args.get('url')
     token = request.args.get('token')
     project = request.args.get('project')
+
+    if None in [url, token, project]:
+        return "Bad Request", 400
+
     discovery = request.args.get('discovery')
 
     command = [f'{os.getcwd()}/jmetrix.py', 'daily_rpt', '-u', url, '-t', token, '-p', project, '-V']
@@ -37,6 +41,11 @@ def run_swimlane_rpt():
     date_from = request.args.get('date_from')
     date_to = request.args.get('date_to')
     jira_label = request.args.get('jira_label')
+
+    # Check if any required parameters are missing
+    if None in [url, token, project, date_from, date_to, jira_label]:
+        return "Bad Request", 400
+
     extra_jira_label = request.args.get('extra_jira_label')
 
     command = [f'{os.getcwd()}/jmetrix.py', 'swimlane_rpt', '-u', url, '-t', token, '-p', project, '-f', date_from, '-T', date_to, '-l', jira_label, '-V']
@@ -50,4 +59,5 @@ def run_swimlane_rpt():
     return render_template('preformatted.html', output=output)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000,  debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
+
