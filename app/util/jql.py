@@ -97,4 +97,3 @@ class JQLs(StrValueEnum):
 #     READY_FOR_SIGN_OFF = "Ready for Sign Off", 0
 #     DONE = 'Done', 0
 #     CLOSED = 'Closed', 0
-
