@@ -79,6 +79,10 @@ def exec(args):
     total_issues_released = run_jql(jira, jql_project_identifier_released)
     aggregates['total_issues_released'] = {'length': len(total_issues_released), 'jql': jql_project_identifier_released}
 
+    # TOTAL ISSUES REJECTED
+    total_issues_rejected = run_jql(jira, jql_project_identifier_rejected)
+    aggregates['total_issues_rejected'] = {'length': len(total_issues_rejected), 'jql': jql_project_identifier_rejected}
+
     # TOTAL ISSUES CREATED BETWEEN DATES
     total_issues_created_between_dates = run_jql(jira, jql_project_identifier_dates)
     aggregates['total_issues_created_between_dates'] = {'length': len(total_issues_created_between_dates), 'jql': jql_project_identifier_dates}

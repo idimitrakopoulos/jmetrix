@@ -9,6 +9,7 @@ import importlib
 if __name__ == '__main__':
     # Instantiate the parser
     parser = argparse.ArgumentParser(prog='jmetrix', description='A CLI tool for Jira metrics', epilog='(c) 2012-present Iason Dimitrakopoulos - idimitrakopoulos@gmail.com')
+    parser.add_argument('-V', '--verbose', action='store_true', help='Run script in Verbose mode')
 
     subparsers = parser.add_subparsers(help='sub-command help', dest='commands')
 
