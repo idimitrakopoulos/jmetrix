@@ -444,6 +444,7 @@ def fancy_print_jql_info(aggregates, title=""):
             table.add_row(str(aggregate),
                           str(aggregates[aggregate]['jql']),
                           str(aggregates[aggregate]['length']))
+            table.add_section()
 
         console = Console()
         console.print(table)
