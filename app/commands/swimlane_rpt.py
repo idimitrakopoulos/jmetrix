@@ -43,19 +43,21 @@ def exec(args):
     jql_project = JQLs.JQL_PROJECT.value.format(args.jira_project)
 
     # Add identifier to JQL
-    jql_project_identifier = "{} {} {} {}".format(jql_project, Filters.LABEL.value.format(args.jira_label), Filters.NOT_DEPENDENCY_LABEL.value, Filters.NOT_TYPE_EPIC.value)
+    jql_project_identifier = "{} {} {}".format(jql_project, Filters.LABEL.value.format(args.jira_label), Filters.NOT_TYPE_EPIC.value)
     if (args.jira_extra_label):
         jql_project_identifier = "{} {}".format(jql_project_identifier, Filters.LABEL.value.format(args.jira_extra_label))
 
+    # Add total filter
+    jql_project_identifier_not_dependent = "{} {}".format(jql_project_identifier, Filters.NOT_DEPENDENCY_LABEL.value,)
 
     # Add released filter
-    jql_project_identifier_released = "{} {}".format(jql_project_identifier, Filters.RELEASED.value)
+    jql_project_identifier_released = "{} {} {}".format(jql_project_identifier, Filters.RELEASED.value, Filters.NOT_DEPENDENCY_LABEL.value,)
 
     # Add rejected filter
-    jql_project_identifier_rejected = "{} {}".format(jql_project_identifier, Filters.REJECTED.value)
+    jql_project_identifier_rejected = "{} {} {}".format(jql_project_identifier, Filters.REJECTED.value, Filters.NOT_DEPENDENCY_LABEL.value,)
 
     # Add in flight filter
-    jql_project_identifier_inflight = "{} {}".format(jql_project_identifier, Filters.IN_FLIGHT.value)
+    jql_project_identifier_inflight = "{} {} {}".format(jql_project_identifier, Filters.IN_FLIGHT.value, Filters.NOT_DEPENDENCY_LABEL.value,)
 
     # Add dates from/to
     jql_project_identifier_dates = "{} {}".format(jql_project_identifier, Filters.CREATED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
@@ -72,8 +74,8 @@ def exec(args):
     aggregates = dict()
 
     # TOTAL ISSUES
-    total_issues = run_jql(jira, jql_project_identifier)
-    aggregates['total_issues'] = {'length': len(total_issues), 'jql': jql_project_identifier}
+    total_issues = run_jql(jira, jql_project_identifier_not_dependent)
+    aggregates['total_issues'] = {'length': len(total_issues), 'jql': jql_project_identifier_not_dependent}
 
     # TOTAL ISSUES RELEASED
     total_issues_released = run_jql(jira, jql_project_identifier_released)
