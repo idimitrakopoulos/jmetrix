@@ -47,8 +47,11 @@ def exec(args):
     if (args.jira_extra_label):
         jql_project_identifier = "{} {}".format(jql_project_identifier, Filters.LABEL.value.format(args.jira_extra_label))
 
-    # Add total filter
-    jql_project_identifier_not_dependent = "{} {}".format(jql_project_identifier, Filters.NOT_DEPENDENCY_LABEL.value,)
+    # Add total filter not dependent
+    jql_project_identifier_not_dependent = "{} {}".format(jql_project_identifier, Filters.NOT_DEPENDENCY_LABEL.value)
+
+    # Add total filter in dependency
+    jql_project_identifier_in_dependency = "{} {}".format(jql_project_identifier, Filters.IN_DEPENDENCY_LABEL.value)
 
     # Add released filter
     jql_project_identifier_released_not_dependent = "{} {} {}".format(jql_project_identifier, Filters.RELEASED.value, Filters.NOT_DEPENDENCY_LABEL.value)
@@ -85,9 +88,13 @@ def exec(args):
 
     aggregates = dict()
 
-    # TOTAL ISSUES CREATED
+    # TOTAL ISSUES CREATED NOT DEPENDENT
     total_issues_created = run_jql(jira, jql_project_identifier_not_dependent)
     aggregates['total_issues_created_not_dependent'] = {'length': len(total_issues_created), 'jql': jql_project_identifier_not_dependent}
+
+    # TOTAL ISSUES CREATED IN DEPENDENCY
+    total_issues_created_in_dependency = run_jql(jira, jql_project_identifier_in_dependency)
+    aggregates['total_issues_created_not_dependent'] = {'length': len(total_issues_created_in_dependency), 'jql': jql_project_identifier_in_dependency}
 
     # TOTAL ISSUES RELEASED
     total_issues_released = run_jql(jira, jql_project_identifier_released_not_dependent)
