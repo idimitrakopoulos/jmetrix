@@ -51,25 +51,25 @@ def exec(args):
     jql_project_identifier_not_dependent = "{} {}".format(jql_project_identifier, Filters.NOT_DEPENDENCY_LABEL.value,)
 
     # Add released filter
-    jql_project_identifier_released = "{} {} {}".format(jql_project_identifier, Filters.RELEASED.value, Filters.NOT_DEPENDENCY_LABEL.value,)
+    jql_project_identifier_released = "{} {} {}".format(jql_project_identifier, Filters.RELEASED.value, Filters.NOT_DEPENDENCY_LABEL.value)
 
     # Add rejected filter
-    jql_project_identifier_rejected = "{} {} {}".format(jql_project_identifier, Filters.REJECTED.value, Filters.NOT_DEPENDENCY_LABEL.value,)
+    jql_project_identifier_rejected = "{} {} {}".format(jql_project_identifier, Filters.REJECTED.value, Filters.NOT_DEPENDENCY_LABEL.value)
 
     # Add in flight filter
-    jql_project_identifier_inflight = "{} {} {}".format(jql_project_identifier, Filters.IN_FLIGHT.value, Filters.NOT_DEPENDENCY_LABEL.value,)
+    jql_project_identifier_inflight = "{} {} {}".format(jql_project_identifier, Filters.IN_FLIGHT.value, Filters.NOT_DEPENDENCY_LABEL.value)
 
     # Add dates from/to
     jql_project_identifier_dates = "{} {}".format(jql_project_identifier, Filters.CREATED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
 
     # Add dates to released filter
-    jql_project_identifier_released_dates = "{} {}".format(jql_project_identifier_released, Filters.RESOLVED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
+    jql_project_identifier_released_dates = "{} {} {}".format(jql_project_identifier, Filters.RELEASED.value, Filters.RESOLVED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
 
     # Add dates to rejected filter
-    jql_project_identifier_rejected_dates = "{} {}".format(jql_project_identifier_rejected, Filters.CREATED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
+    jql_project_identifier_rejected_dates = "{} {} {}".format(jql_project_identifier, Filters.REJECTED.value, Filters.RESOLVED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
 
     # Add dates to in flight filter
-    jql_project_identifier_in_flight_dates = "{} {}".format(jql_project_identifier_inflight, Filters.NOT_CREATED_DATES_FROM_TO.value.format(args.date_from))
+    jql_project_identifier_in_flight_dates = "{} {} {}".format(jql_project_identifier, Filters.IN_FLIGHT.value, Filters.RESOLVED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
 
     aggregates = dict()
 
@@ -84,6 +84,10 @@ def exec(args):
     # TOTAL ISSUES REJECTED
     total_issues_rejected = run_jql(jira, jql_project_identifier_rejected)
     aggregates['total_issues_rejected'] = {'length': len(total_issues_rejected), 'jql': jql_project_identifier_rejected}
+
+    # TOTAL ISSUES IN FLIGHT
+    total_issues_in_flight = run_jql(jira, jql_project_identifier_inflight)
+    aggregates['total_issues_in_flight'] = {'length': len(total_issues_in_flight), 'jql': jql_project_identifier_inflight}
 
     # TOTAL ISSUES CREATED BETWEEN DATES
     total_issues_created_between_dates = run_jql(jira, jql_project_identifier_dates)
