@@ -94,7 +94,7 @@ def exec(args):
 
     # TOTAL ISSUES CREATED IN DEPENDENCY
     total_issues_created_in_dependency = run_jql(jira, jql_project_identifier_in_dependency)
-    aggregates['total_issues_created_not_dependent'] = {'length': len(total_issues_created_in_dependency), 'jql': jql_project_identifier_in_dependency}
+    aggregates['total_issues_created_in_dependency'] = {'length': len(total_issues_created_in_dependency), 'jql': jql_project_identifier_in_dependency}
 
     # TOTAL ISSUES RELEASED
     total_issues_released = run_jql(jira, jql_project_identifier_released_not_dependent)
