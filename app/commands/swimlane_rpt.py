@@ -54,13 +54,13 @@ def exec(args):
     jql_project_identifier_in_dependency = "{} {}".format(jql_project_identifier, Filters.IN_DEPENDENCY_LABEL.value)
 
     # Add released filter
-    jql_project_identifier_released_not_dependent = "{} {} {}".format(jql_project_identifier, Filters.RELEASED.value, Filters.NOT_DEPENDENCY_LABEL.value)
+    jql_project_identifier_released = "{} {}".format(jql_project_identifier, Filters.RELEASED.value)
 
     # Add rejected filter
-    jql_project_identifier_rejected_not_dependent = "{} {} {}".format(jql_project_identifier, Filters.REJECTED.value, Filters.NOT_DEPENDENCY_LABEL.value)
+    jql_project_identifier_rejected = "{} {}".format(jql_project_identifier, Filters.REJECTED.value)
 
     # Add in flight filter
-    jql_project_identifier_inflight_not_dependent = "{} {} {}".format(jql_project_identifier, Filters.IN_FLIGHT.value, Filters.NOT_DEPENDENCY_LABEL.value)
+    jql_project_identifier_inflight = "{} {}".format(jql_project_identifier, Filters.IN_FLIGHT.value)
 
     # Add created dates from/to
     jql_project_identifier_created_dates = "{} {}".format(jql_project_identifier, Filters.CREATED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
@@ -91,25 +91,25 @@ def exec(args):
 
     aggregates = dict()
 
-    # TOTAL ISSUES CREATED NOT DEPENDENT
-    total_issues_created = run_jql(jira, jql_project_identifier_not_dependent)
-    aggregates['total_issues_created_not_dependent'] = {'length': len(total_issues_created), 'jql': jql_project_identifier_not_dependent}
+    # TOTAL ISSUES CREATED
+    total_issues_created = run_jql(jira, jql_project_identifier)
+    aggregates['total_issues_created'] = {'length': len(total_issues_created), 'jql': jql_project_identifier}
 
     # TOTAL ISSUES CREATED IN DEPENDENCY
     total_issues_created_in_dependency = run_jql(jira, jql_project_identifier_in_dependency)
     aggregates['total_issues_created_in_dependency'] = {'length': len(total_issues_created_in_dependency), 'jql': jql_project_identifier_in_dependency}
 
     # TOTAL ISSUES RELEASED
-    total_issues_released = run_jql(jira, jql_project_identifier_released_not_dependent)
-    aggregates['total_issues_released_not_dependent'] = {'length': len(total_issues_released), 'jql': jql_project_identifier_released_not_dependent}
+    total_issues_released = run_jql(jira, jql_project_identifier_released)
+    aggregates['total_issues_released'] = {'length': len(total_issues_released), 'jql': jql_project_identifier_released}
 
     # TOTAL ISSUES REJECTED
-    total_issues_rejected = run_jql(jira, jql_project_identifier_rejected_not_dependent)
-    aggregates['total_issues_rejected_not_dependent'] = {'length': len(total_issues_rejected), 'jql': jql_project_identifier_rejected_not_dependent}
+    total_issues_rejected = run_jql(jira, jql_project_identifier_rejected)
+    aggregates['total_issues_rejected'] = {'length': len(total_issues_rejected), 'jql': jql_project_identifier_rejected}
 
     # TOTAL ISSUES IN FLIGHT
-    total_issues_in_flight = run_jql(jira, jql_project_identifier_inflight_not_dependent)
-    aggregates['total_issues_in_flight_not_dependent'] = {'length': len(total_issues_in_flight), 'jql': jql_project_identifier_inflight_not_dependent}
+    total_issues_in_flight = run_jql(jira, jql_project_identifier_inflight)
+    aggregates['total_issues_in_flight'] = {'length': len(total_issues_in_flight), 'jql': jql_project_identifier_inflight}
 
     # TOTAL ISSUES CREATED BETWEEN DATES
     total_issues_created_between_dates = run_jql(jira, jql_project_identifier_created_dates)
