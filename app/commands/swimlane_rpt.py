@@ -147,4 +147,3 @@ def exec(args):
     fancy_print_jql_info(aggregates, "Swimlane report aggregates")
     fancy_print_issue_summary(total_issues_created_between_dates, jql_project_identifier_created_dates)
     fancy_print_issue_history(total_issues_in_flight_after_date, jql_project_identifier_in_flight_dates)
-
