@@ -13,6 +13,12 @@ if __name__ == '__main__':
 
     subparsers = parser.add_subparsers(help='sub-command help', dest='commands')
 
+    # Test
+    test_parser = subparsers.add_parser('test', help='Test stuff')
+    test_required_args = test_parser.add_argument_group('required arguments')
+    test_required_args.add_argument('-u', '--url', dest='jira_server_url', type=str, help='The Jira server base URL (e.g. https://xxxx.xxx.xxx)', required=True)
+    test_required_args.add_argument('-t', '--token', dest='jira_auth_token', type=str, help='The Jira authentication token', required=True)
+
     # Inspect
     inspect_parser = subparsers.add_parser('inspect', help='Inspect a JQL')
     inspect_required_args = inspect_parser.add_argument_group('required arguments')

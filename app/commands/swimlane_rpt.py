@@ -1,7 +1,10 @@
 import logging
+
+import ipdb
+
 log = logging.getLogger('root')
 from util.jql import JQLs, Filters
-from util.toolkit import jira_token_authenticate, run_jql, fancy_print_issue_summary, fancy_print_issue_history, fancy_print_jql_info
+from util.toolkit import jira_token_authenticate, run_jql, fancy_print_issue_summary, fancy_print_issue_history, fancy_print_jql_info, simple_print_issue_keys
 
 def exec(args):
 
@@ -99,6 +102,7 @@ def exec(args):
                                                   Filters.IN_LABEL.value.format(args.jira_label) + " " + Filters.IN_LABEL.value.format(args.jira_extra_label) if args.jira_extra_label else "")
     total_issues_created = run_jql(jira, total_issues_created_jql)
     aggregates['total_issues_created'] = {'length': len(total_issues_created), 'jql': total_issues_created_jql}
+    # print_result_list_keys("total_issues_created", total_issues_created)
 
     # TOTAL ISSUES CREATED IN DEPENDENCY
     total_issues_created_in_dependency_jql = "{} {} {} {} {}".format(JQLs.JQL_PROJECT.value.format(args.jira_project),
@@ -117,6 +121,7 @@ def exec(args):
                                                   Filters.RELEASED.value)
     total_issues_released = run_jql(jira, total_issues_released_jql)
     aggregates['total_issues_released'] = {'length': len(total_issues_released), 'jql': total_issues_released_jql}
+
 
     # TOTAL ISSUES REJECTED
     total_issues_rejected_jql = "{} {} {} {} {}".format(JQLs.JQL_PROJECT.value.format(args.jira_project),
@@ -218,8 +223,11 @@ def exec(args):
                                                   Filters.CREATED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
     total_issues_in_flight_after_date_in_dependency = run_jql(jira, total_issues_in_flight_after_date_in_dependency_jql)
     aggregates['total_issues_in_flight_after_date_in_dependency'] = {'length': len(total_issues_in_flight_after_date_in_dependency), 'jql': total_issues_in_flight_after_date_in_dependency_jql}
+    # ipdb.set_trace()
 
     # Print rich tables
     fancy_print_jql_info(aggregates, "Swimlane report aggregates")
-    fancy_print_issue_summary(total_issues_created_between_dates, total_issues_created_between_dates_jql)
-    fancy_print_issue_history(total_issues_in_flight_after_date, total_issues_in_flight_after_date_jql)
+    simple_print_issue_keys(total_issues_created_between_dates, "total_issues_created_between_dates")
+    simple_print_issue_keys(total_issues_released_between_dates, "total_issues_released_between_dates")
+    # fancy_print_issue_history(total_issues_in_flight_after_date, total_issues_in_flight_after_date_jql)
+

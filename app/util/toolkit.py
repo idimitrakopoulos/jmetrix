@@ -494,3 +494,17 @@ def add_worktimes_and_durations(counters):
         result['duration'] = 0
 
     return dict(result)
+
+def print_result_list_keys(title, lst):
+    log.debug(title)
+    for key in lst:
+        print(key)
+
+def simple_print_issue_keys(issues, title=""):
+    result = []
+    if issues:
+        log.debug(title)
+        for issue in issues:
+            result.append(issue.key)
+
+        log.debug(', '.join(result))
