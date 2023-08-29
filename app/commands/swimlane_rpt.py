@@ -43,15 +43,16 @@ def exec(args):
     jql_project = JQLs.JQL_PROJECT.value.format(args.jira_project)
 
     # Add identifier to JQL
-    jql_project_identifier = "{} {} {}".format(jql_project, Filters.LABEL.value.format(args.jira_label), Filters.NOT_TYPE_EPIC.value)
+    jql_project_identifier = "{} {} {} {}".format(jql_project,
+                                                  Filters.IN_LABEL.value.format(args.jira_label),
+                                                  Filters.NOT_TYPE_EPIC.value,
+                                                  Filters.NOT_IN_LABEL.value.format("scope_split"))
     if (args.jira_extra_label):
-        jql_project_identifier = "{} {}".format(jql_project_identifier, Filters.LABEL.value.format(args.jira_extra_label))
+        jql_project_identifier = "{} {}".format(jql_project_identifier, Filters.IN_LABEL.value.format(args.jira_extra_label))
 
-    # Add total filter not dependent
-    jql_project_identifier_not_dependent = "{} {}".format(jql_project_identifier, Filters.NOT_DEPENDENCY_LABEL.value)
 
     # Add total filter in dependency
-    jql_project_identifier_in_dependency = "{} {}".format(jql_project_identifier, Filters.IN_DEPENDENCY_LABEL.value)
+    jql_project_identifier_in_dependency = "{} {}".format(jql_project_identifier, Filters.IN_LABEL.value.format("Dependency"))
 
     # Add released filter
     jql_project_identifier_released = "{} {}".format(jql_project_identifier, Filters.RELEASED.value)
@@ -69,25 +70,25 @@ def exec(args):
     jql_project_identifier_resolved_dates = "{} {}".format(jql_project_identifier, Filters.RESOLVED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
 
     # Add total in dependency
-    jql_project_identifier_dates_in_dependency = "{} {}".format(jql_project_identifier_created_dates, Filters.IN_DEPENDENCY_LABEL.value)
+    jql_project_identifier_dates_in_dependency = "{} {}".format(jql_project_identifier_created_dates, Filters.IN_LABEL.value.format("Dependency"))
 
     # Add dates to released filter
     jql_project_identifier_released_dates = "{} {}".format(jql_project_identifier_resolved_dates, Filters.RELEASED.value)
 
     # Add dates to released filter in depencency
-    jql_project_identifier_released_dates_in_dependency = "{} {}".format(jql_project_identifier_resolved_dates, Filters.IN_DEPENDENCY_LABEL.value)
+    jql_project_identifier_released_dates_in_dependency = "{} {}".format(jql_project_identifier_resolved_dates, Filters.IN_LABEL.value.format("Dependency"))
 
     # Add dates to rejected filter
     jql_project_identifier_rejected_dates = "{} {}".format(jql_project_identifier_resolved_dates, Filters.REJECTED.value)
 
     # Add dates to rejected filter in dependency
-    jql_project_identifier_rejected_dates_in_dependency = "{} {}".format(jql_project_identifier_resolved_dates, Filters.IN_DEPENDENCY_LABEL.value)
+    jql_project_identifier_rejected_dates_in_dependency = "{} {}".format(jql_project_identifier_resolved_dates, Filters.IN_LABEL.value.format("Dependency"))
 
     # Add dates to in flight filter
     jql_project_identifier_in_flight_dates = "{} {}".format(jql_project_identifier_created_dates, Filters.IN_FLIGHT.value)
 
     # Add dates to in flight filter
-    jql_project_identifier_in_flight_dates_in_dependency = "{} {}".format(jql_project_identifier_in_flight_dates, Filters.IN_DEPENDENCY_LABEL.value)
+    jql_project_identifier_in_flight_dates_in_dependency = "{} {}".format(jql_project_identifier_in_flight_dates, Filters.IN_LABEL.value.format("Dependency"))
 
     aggregates = dict()
 
