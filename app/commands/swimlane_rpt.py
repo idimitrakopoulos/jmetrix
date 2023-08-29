@@ -62,26 +62,29 @@ def exec(args):
     # Add in flight filter
     jql_project_identifier_inflight_not_dependent = "{} {} {}".format(jql_project_identifier, Filters.IN_FLIGHT.value, Filters.NOT_DEPENDENCY_LABEL.value)
 
-    # Add dates from/to
-    jql_project_identifier_dates = "{} {}".format(jql_project_identifier, Filters.CREATED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
+    # Add created dates from/to
+    jql_project_identifier_created_dates = "{} {}".format(jql_project_identifier, Filters.CREATED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
+
+    # Add created dates from/to
+    jql_project_identifier_resolved_dates = "{} {}".format(jql_project_identifier, Filters.RESOLVED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
 
     # Add total in dependency
-    jql_project_identifier_dates_in_dependency = "{} {}".format(jql_project_identifier_dates, Filters.IN_DEPENDENCY_LABEL.value)
+    jql_project_identifier_dates_in_dependency = "{} {}".format(jql_project_identifier_created_dates, Filters.IN_DEPENDENCY_LABEL.value)
 
     # Add dates to released filter
-    jql_project_identifier_released_dates = "{} {}".format(jql_project_identifier_dates, Filters.RELEASED.value)
+    jql_project_identifier_released_dates = "{} {}".format(jql_project_identifier_resolved_dates, Filters.RELEASED.value)
 
     # Add dates to released filter in depencency
-    jql_project_identifier_released_dates_in_dependency = "{} {}".format(jql_project_identifier_released_dates, Filters.IN_DEPENDENCY_LABEL.value)
+    jql_project_identifier_released_dates_in_dependency = "{} {}".format(jql_project_identifier_resolved_dates, Filters.IN_DEPENDENCY_LABEL.value)
 
     # Add dates to rejected filter
-    jql_project_identifier_rejected_dates = "{} {}".format(jql_project_identifier_dates, Filters.REJECTED.value)
+    jql_project_identifier_rejected_dates = "{} {}".format(jql_project_identifier_resolved_dates, Filters.REJECTED.value)
 
     # Add dates to rejected filter in dependency
-    jql_project_identifier_rejected_dates_in_dependency = "{} {}".format(jql_project_identifier_rejected_dates, Filters.IN_DEPENDENCY_LABEL.value)
+    jql_project_identifier_rejected_dates_in_dependency = "{} {}".format(jql_project_identifier_resolved_dates, Filters.IN_DEPENDENCY_LABEL.value)
 
     # Add dates to in flight filter
-    jql_project_identifier_in_flight_dates = "{} {}".format(jql_project_identifier_dates, Filters.IN_FLIGHT.value)
+    jql_project_identifier_in_flight_dates = "{} {}".format(jql_project_identifier_created_dates, Filters.IN_FLIGHT.value)
 
     # Add dates to in flight filter
     jql_project_identifier_in_flight_dates_in_dependency = "{} {}".format(jql_project_identifier_in_flight_dates, Filters.IN_DEPENDENCY_LABEL.value)
@@ -109,8 +112,8 @@ def exec(args):
     aggregates['total_issues_in_flight_not_dependent'] = {'length': len(total_issues_in_flight), 'jql': jql_project_identifier_inflight_not_dependent}
 
     # TOTAL ISSUES CREATED BETWEEN DATES
-    total_issues_created_between_dates = run_jql(jira, jql_project_identifier_dates)
-    aggregates['total_issues_created_between_dates'] = {'length': len(total_issues_created_between_dates), 'jql': jql_project_identifier_dates}
+    total_issues_created_between_dates = run_jql(jira, jql_project_identifier_created_dates)
+    aggregates['total_issues_created_between_dates'] = {'length': len(total_issues_created_between_dates), 'jql': jql_project_identifier_created_dates}
 
     # TOTAL ISSUES RELEASED BETWEEN DATES
     total_issues_released_between_dates = run_jql(jira, jql_project_identifier_released_dates)
@@ -133,8 +136,8 @@ def exec(args):
     aggregates['total_issues_released_between_dates_in_dependency'] = {'length': len(total_issues_released_between_dates_in_dependency), 'jql': jql_project_identifier_released_dates_in_dependency}
 
     # TOTAL ISSUES REJECTED BETWEEN DATES IN DEPENDENCY
-    total_issues_rejected_between_dates_in_dependencu = run_jql(jira, jql_project_identifier_rejected_dates_in_dependency)
-    aggregates['total_issues_rejected_between_dates_in_dependency'] = {'length': len(total_issues_rejected_between_dates_in_dependencu), 'jql': jql_project_identifier_rejected_dates_in_dependency}
+    total_issues_rejected_between_dates_in_dependency = run_jql(jira, jql_project_identifier_rejected_dates_in_dependency)
+    aggregates['total_issues_rejected_between_dates_in_dependency'] = {'length': len(total_issues_rejected_between_dates_in_dependency), 'jql': jql_project_identifier_rejected_dates_in_dependency}
 
     # TOTAL ISSUES IN FLIGHT BETWEEN DATES IN DEPENDENCY
     total_issues_in_flight_after_date_in_dependency = run_jql(jira, jql_project_identifier_in_flight_dates_in_dependency)
@@ -142,6 +145,6 @@ def exec(args):
 
     # Print rich tables
     fancy_print_jql_info(aggregates, "Swimlane report aggregates")
-    fancy_print_issue_summary(total_issues_created_between_dates, jql_project_identifier_dates)
+    fancy_print_issue_summary(total_issues_created_between_dates, jql_project_identifier_created_dates)
     fancy_print_issue_history(total_issues_in_flight_after_date, jql_project_identifier_in_flight_dates)
 
