@@ -166,4 +166,3 @@ def exec(args):
     simple_print_issue_keys(total_issues_created_between_dates, "total_issues_created_between_dates")
     simple_print_issue_keys(total_issues_released_between_dates, "total_issues_released_between_dates")
     # fancy_print_issue_history(total_issues_in_flight_after_date, total_issues_in_flight_after_date_jql)
-
