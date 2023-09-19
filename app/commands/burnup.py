@@ -42,6 +42,7 @@ def calculate_weeks_without_weekends(from_date, to_date=None):
 
 
 
+
 def exec(args):
 
     # Connect to Jira instance
