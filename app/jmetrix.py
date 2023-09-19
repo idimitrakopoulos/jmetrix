@@ -55,6 +55,19 @@ if __name__ == '__main__':
     daily_rpt_optional_args.add_argument('-d', '--discovery', action='store_true', help='Run report for discovery board too')
     daily_rpt_optional_args.add_argument('-V', '--verbose', action='store_true', help='Run script in Verbose mode')
 
+    # Burn-up report
+    burnup_parser = subparsers.add_parser('burnup', help='Burnup Report from Jira based on specific values')
+    burnup_required_args = burnup_parser.add_argument_group('required arguments')
+    burnup_required_args.add_argument('-u', '--url', dest='jira_server_url', type=str, help='The Jira server base URL (e.g. https://xxxx.xxx.xxx)', required=True)
+    burnup_required_args.add_argument('-t', '--token', dest='jira_auth_token', type=str, help='The Jira authentication token', required=True)
+    burnup_required_args.add_argument('-p', '--project', dest='jira_project', type=str, help='The Jira project key (e.g. OGST)', required=True)
+    burnup_required_args.add_argument('-f', '--from', dest='date_from', type=str, help='The date from which to search in the format of yyyy-mm-dd', required=True)
+    burnup_required_args.add_argument('-l', '--label', dest='jira_label', type=str, help='The issue label to use for issue search', required=True)
+    burnup_optional_args = burnup_parser.add_argument_group('optional arguments')
+    # burnup_optional_args.add_argument('-L', '--extralabel', dest='jira_extra_label', type=str, help='An extra issue label to use for issue search', required=False)
+    burnup_optional_args.add_argument('-T', '--to', dest='date_to', type=str, help='The date up to which to search in the format of yyyy-mm-dd')
+    burnup_optional_args.add_argument('-V', '--verbose', action='store_true', help='Run script in Verbose mode')
+
     # Parse arguments
     args = parser.parse_args()
 
