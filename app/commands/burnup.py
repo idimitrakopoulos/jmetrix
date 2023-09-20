@@ -1,8 +1,8 @@
 import logging
 log = logging.getLogger('root')
-from util.jql import JQLs, Filters, Status
+from util.jql import Filters, Status, IssueType
 from util.toolkit import jira_token_authenticate, run_jql, fancy_print_issue_timings, get_time_in_current_status, \
-    get_time_between_distant_statuses, group_issues_by_assignee, seconds_to_hours
+    get_time_between_distant_statuses, group_issues_by_assignee, seconds_to_hours, prepare_jira_labels, get_jira_issue_keys, fancy_print_jql_info
 import ipdb, json
 
 from datetime import datetime, timedelta
@@ -48,16 +48,66 @@ def exec(args):
     # Connect to Jira instance
     jira = jira_token_authenticate(args.jira_server_url, args.jira_auth_token)
 
-    aggregates = dict()
+    generic_aggregates = dict()
+    week_aggregates = dict()
 
+    # Determine Weeks
     project_weeks = calculate_weeks_without_weekends(args.date_from, args.date_to)
 
-    for project_week in project_weeks.values():
-        log.debug(f"Week from {project_week[0].strftime('%Y-%m-%d')} to {project_week[1].strftime('%Y-%m-%d')}")
+    # Prepare lvl1 and lvl2 labels as given by user
+    prepared_jira_lvl1_labels = prepare_jira_labels(args.jira_lvl1_labels)
+    prepared_jira_lvl2_labels = prepare_jira_labels(args.jira_lvl2_labels)
 
-        # # TOTAL ISSUES CREATED
-        # total_issues_created_jql = "{} {} {}".format(JQLs.JQL_PROJECT.value.format(args.jira_project),
-        #                                               Filters.NOT_TYPE_EPIC.value,
-        #                                               Filters.IN_LABEL.value.format(args.jira_label) + " " + Filters.IN_LABEL.value.format(args.jira_extra_label) if args.jira_extra_label else "")
-        # total_issues_created = run_jql(jira, total_issues_created_jql)
-        # aggregates['total_issues_created'] = {'length': len(total_issues_created), 'jql': total_issues_created_jql}
+    # ALL
+    total_initiative_issues_jql = "{} {} {}".format(Filters.PROJECT.value.format(args.jira_project),
+                                                          Filters.IN_ISSUETYPE.value.format("{}, {}, {}, {}".format(IssueType.STORY.value, IssueType.BUG.value, IssueType.TASK.value, IssueType.SPIKE.value)),
+                                                          prepared_jira_lvl1_labels)
+    total_initiative_issues = run_jql(jira, total_initiative_issues_jql)
+    generic_aggregates['total_initiative_issues_jql'] = {'length': len(total_initiative_issues), 'keys': get_jira_issue_keys(total_initiative_issues), 'jql': total_initiative_issues_jql}
+    fancy_print_jql_info(generic_aggregates, "Generic Aggregates")
+
+    # Get all epics
+    # epics_jql = "{} {} {}".format(Filters.PROJECT.value.format(args.jira_project),
+    #                               prepared_jira_lvl1_labels,
+    #                               Filters.IN_ISSUETYPE.value.format(IssueType.EPIC.value))
+    # prepared_jira_epic_keys = get_jira_issue_keys(run_jql(jira, epics_jql))
+
+
+    # prepared_jira_lvl1_epics = get_jira_issue_keys(run_jql(jira, "project = OGST and issuetype = Epic AND created >= '{}' AND created <= '{}'".format(datetime.strftime(project_week[0], '%Y-%m-%d %H:%M'), datetime.strftime(project_week[1], '%Y-%m-%d %H:%M'))))
+
+    for project_week in project_weeks.values():
+        log.debug(f"Week from {project_week[0].strftime('%Y-%m-%d %H:%M')} to {project_week[1].strftime('%Y-%m-%d %H:%M')}")
+
+        # ADDED
+        total_added_issues_within_period_jql = "{} {} {} {} {}".format(Filters.PROJECT.value.format(args.jira_project),
+                                                                 Filters.CREATED_DATETIME_FROM_TO.value.format(datetime.strftime(project_week[0], '%Y-%m-%d %H:%M'), datetime.strftime(project_week[1], '%Y-%m-%d %H:%M')),
+                                                                 Filters.EPIC_LINK_IS_EMPTY.value,
+                                                                 Filters.IN_ISSUETYPE.value.format("{}, {}, {}, {}".format(IssueType.STORY.value, IssueType.BUG.value, IssueType.TASK.value, IssueType.SPIKE.value)),
+                                                                 prepared_jira_lvl1_labels)
+
+        total_added_issues_within_period = run_jql(jira, total_added_issues_within_period_jql)
+        week_aggregates['total_added_issues_within_period'] = {'length': len(total_added_issues_within_period), 'keys': get_jira_issue_keys(total_added_issues_within_period),'jql': total_added_issues_within_period_jql}
+
+        # UPDATED
+        total_updated_issues_within_period_jql = "{} {} {} {} {}".format(Filters.PROJECT.value.format(args.jira_project),
+                                                                 Filters.UPDATED_DATETIME_FROM_TO.value.format(datetime.strftime(project_week[0], '%Y-%m-%d %H:%M'), datetime.strftime(project_week[1], '%Y-%m-%d %H:%M')),
+                                                                 Filters.EPIC_LINK_IS_EMPTY.value,
+                                                                 Filters.IN_ISSUETYPE.value.format("{}, {}, {}, {}".format(IssueType.STORY.value, IssueType.BUG.value, IssueType.TASK.value, IssueType.SPIKE.value)),
+                                                                 prepared_jira_lvl1_labels)
+
+        total_updated_issues_within_period = run_jql(jira, total_updated_issues_within_period_jql)
+        week_aggregates['total_updated_issues_within_period'] = {'length': len(total_updated_issues_within_period), 'keys': get_jira_issue_keys(total_updated_issues_within_period),'jql': total_updated_issues_within_period_jql}
+
+        # REJECTED
+        total_rejected_issues_within_period_jql = "{} {} {} {} {} {}".format(Filters.PROJECT.value.format(args.jira_project),
+                                                                 Filters.UPDATED_DATETIME_FROM_TO.value.format(datetime.strftime(project_week[0], '%Y-%m-%d %H:%M'), datetime.strftime(project_week[1], '%Y-%m-%d %H:%M')),
+                                                                 Filters.EPIC_LINK_IS_EMPTY.value,
+                                                                 Filters.IN_ISSUETYPE.value.format("{}, {}, {}, {}".format(IssueType.STORY.value, IssueType.BUG.value, IssueType.TASK.value, IssueType.SPIKE.value)),
+                                                                 prepared_jira_lvl1_labels,
+                                                                 Filters.REJECTED.value)
+
+        total_rejected_issues_within_period = run_jql(jira, total_rejected_issues_within_period_jql)
+        week_aggregates['total_rejected_issues_within_period'] = {'length': len(total_rejected_issues_within_period), 'keys': get_jira_issue_keys(total_rejected_issues_within_period),'jql': total_rejected_issues_within_period_jql}
+
+        # Print in nice table
+        fancy_print_jql_info(week_aggregates, f"Week from {project_week[0].strftime('%Y-%m-%d %H:%M')} to {project_week[1].strftime('%Y-%m-%d %H:%M')}")

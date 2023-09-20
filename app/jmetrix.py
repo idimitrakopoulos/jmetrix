@@ -62,9 +62,9 @@ if __name__ == '__main__':
     burnup_required_args.add_argument('-t', '--token', dest='jira_auth_token', type=str, help='The Jira authentication token', required=True)
     burnup_required_args.add_argument('-p', '--project', dest='jira_project', type=str, help='The Jira project key (e.g. OGST)', required=True)
     burnup_required_args.add_argument('-f', '--from', dest='date_from', type=str, help='The date from which to search in the format of yyyy-mm-dd', required=True)
-    burnup_required_args.add_argument('-l', '--label', dest='jira_label', type=str, help='The issue label to use for issue search', required=True)
+    burnup_required_args.add_argument('-l', '--lvl1_labels', dest='jira_lvl1_labels', type=str, help='Jira labels in comma separated string will be joined and any labels separated with colon will be split. For example "label1,label2;label3", you can use ! before each field to negate them', required=True)
+    burnup_required_args.add_argument('-L', '--lvl2_labels', dest='jira_lvl2_labels', type=str, help='Jira labels in comma separated string will be joined and any labels separated with colon will be split. For example "label1,label2;label3", you can use ! before each field to negate them', required=True)
     burnup_optional_args = burnup_parser.add_argument_group('optional arguments')
-    # burnup_optional_args.add_argument('-L', '--extralabel', dest='jira_extra_label', type=str, help='An extra issue label to use for issue search', required=False)
     burnup_optional_args.add_argument('-T', '--to', dest='date_to', type=str, help='The date up to which to search in the format of yyyy-mm-dd')
     burnup_optional_args.add_argument('-V', '--verbose', action='store_true', help='Run script in Verbose mode')
 

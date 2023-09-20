@@ -3,7 +3,7 @@ import logging
 import ipdb
 
 log = logging.getLogger('root')
-from util.jql import JQLs, Filters
+from util.jql import Filters
 from util.toolkit import jira_token_authenticate, run_jql, fancy_print_issue_summary, fancy_print_issue_history, fancy_print_jql_info, simple_print_issue_keys
 
 def exec(args):
@@ -45,7 +45,7 @@ def exec(args):
     aggregates = dict()
 
     # TOTAL ISSUES CREATED
-    total_issues_created_jql = "{} {} {}".format(JQLs.JQL_PROJECT.value.format(args.jira_project),
+    total_issues_created_jql = "{} {} {}".format(Filters.PROJECT.value.format(args.jira_project),
                                                   Filters.NOT_TYPE_EPIC.value,
                                                   Filters.IN_LABEL.value.format(args.jira_label) + " " + Filters.IN_LABEL.value.format(args.jira_extra_label) if args.jira_extra_label else "")
     total_issues_created = run_jql(jira, total_issues_created_jql)
@@ -53,7 +53,7 @@ def exec(args):
     # print_result_list_keys("total_issues_created", total_issues_created)
 
     # TOTAL ISSUES CREATED IN DEPENDENCY
-    total_issues_created_in_dependency_jql = "{} {} {} {}".format(JQLs.JQL_PROJECT.value.format(args.jira_project),
+    total_issues_created_in_dependency_jql = "{} {} {} {}".format(Filters.PROJECT.value.format(args.jira_project),
                                                   Filters.NOT_TYPE_EPIC.value,
                                                   Filters.IN_LABEL.value.format(args.jira_label) + " " + Filters.IN_LABEL.value.format(args.jira_extra_label) if args.jira_extra_label else "",
                                                   Filters.IN_LABEL.value.format("Dependency"))
@@ -61,7 +61,7 @@ def exec(args):
     aggregates['total_issues_created_in_dependency'] = {'length': len(total_issues_created_in_dependency), 'jql': total_issues_created_in_dependency_jql}
 
     # TOTAL ISSUES RELEASED
-    total_issues_released_jql = "{} {} {} {}".format(JQLs.JQL_PROJECT.value.format(args.jira_project),
+    total_issues_released_jql = "{} {} {} {}".format(Filters.PROJECT.value.format(args.jira_project),
                                                   Filters.NOT_TYPE_EPIC.value,
                                                   Filters.IN_LABEL.value.format(args.jira_label) + " " + Filters.IN_LABEL.value.format(args.jira_extra_label) if args.jira_extra_label else "",
                                                   Filters.RELEASED.value)
@@ -70,7 +70,7 @@ def exec(args):
 
 
     # TOTAL ISSUES REJECTED
-    total_issues_rejected_jql = "{} {} {} {}".format(JQLs.JQL_PROJECT.value.format(args.jira_project),
+    total_issues_rejected_jql = "{} {} {} {}".format(Filters.PROJECT.value.format(args.jira_project),
                                                   Filters.NOT_TYPE_EPIC.value,
                                                   Filters.IN_LABEL.value.format(args.jira_label) + " " + Filters.IN_LABEL.value.format(args.jira_extra_label) if args.jira_extra_label else "",
                                                   Filters.REJECTED.value)
@@ -78,7 +78,7 @@ def exec(args):
     aggregates['total_issues_rejected'] = {'length': len(total_issues_rejected), 'jql': total_issues_rejected_jql}
 
     # TOTAL ISSUES IN FLIGHT
-    total_issues_in_flight_jql = "{} {} {} {}".format(JQLs.JQL_PROJECT.value.format(args.jira_project),
+    total_issues_in_flight_jql = "{} {} {} {}".format(Filters.PROJECT.value.format(args.jira_project),
                                                   Filters.NOT_TYPE_EPIC.value,
                                                   Filters.IN_LABEL.value.format(args.jira_label) + " " + Filters.IN_LABEL.value.format(args.jira_extra_label) if args.jira_extra_label else "",
                                                   Filters.IN_FLIGHT.value)
@@ -86,15 +86,15 @@ def exec(args):
     aggregates['total_issues_in_flight'] = {'length': len(total_issues_in_flight), 'jql': total_issues_in_flight_jql}
 
     # TOTAL ISSUES CREATED BETWEEN DATES
-    total_issues_created_between_dates_jql = "{} {} {} {}".format(JQLs.JQL_PROJECT.value.format(args.jira_project),
-                                                  Filters.NOT_TYPE_EPIC.value,
+    total_issues_created_between_dates_jql = "{} {} {} {}".format(Filters.PROJECT.value.format(args.jira_project),
+                                                                  Filters.NOT_TYPE_EPIC.value,
                                                   Filters.IN_LABEL.value.format(args.jira_label) + " " + Filters.IN_LABEL.value.format(args.jira_extra_label) if args.jira_extra_label else "",
-                                                  Filters.CREATED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
+                                                                  Filters.CREATED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
     total_issues_created_between_dates = run_jql(jira, total_issues_created_between_dates_jql)
     aggregates['total_issues_created_between_dates'] = {'length': len(total_issues_created_between_dates), 'jql': total_issues_created_between_dates_jql}
 
     # TOTAL ISSUES RELEASED BETWEEN DATES
-    total_issues_released_between_dates_jql = "{} {} {} {} {}".format(JQLs.JQL_PROJECT.value.format(args.jira_project),
+    total_issues_released_between_dates_jql = "{} {} {} {} {}".format(Filters.PROJECT.value.format(args.jira_project),
                                                   Filters.NOT_TYPE_EPIC.value,
                                                   Filters.IN_LABEL.value.format(args.jira_label) + " " + Filters.IN_LABEL.value.format(args.jira_extra_label) if args.jira_extra_label else "",
                                                   Filters.RELEASED.value,
@@ -103,7 +103,7 @@ def exec(args):
     aggregates['total_issues_released_between_dates'] = {'length': len(total_issues_released_between_dates), 'jql': total_issues_released_between_dates_jql}
 
     # TOTAL ISSUES REJECTED BETWEEN DATES
-    total_issues_rejected_between_dates_jql = "{} {} {} {} {}".format(JQLs.JQL_PROJECT.value.format(args.jira_project),
+    total_issues_rejected_between_dates_jql = "{} {} {} {} {}".format(Filters.PROJECT.value.format(args.jira_project),
                                                   Filters.NOT_TYPE_EPIC.value,
                                                   Filters.IN_LABEL.value.format(args.jira_label) + " " + Filters.IN_LABEL.value.format(args.jira_extra_label) if args.jira_extra_label else "",
                                                   Filters.REJECTED.value,
@@ -112,16 +112,16 @@ def exec(args):
     aggregates['total_issues_rejected_between_dates'] = {'length': len(total_issues_rejected_between_dates), 'jql': total_issues_rejected_between_dates_jql}
 
     # TOTAL ISSUES IN FLIGHT BETWEEN DATES
-    total_issues_in_flight_after_date_jql = "{} {} {} {} {}".format(JQLs.JQL_PROJECT.value.format(args.jira_project),
-                                                  Filters.NOT_TYPE_EPIC.value,
+    total_issues_in_flight_after_date_jql = "{} {} {} {} {}".format(Filters.PROJECT.value.format(args.jira_project),
+                                                                    Filters.NOT_TYPE_EPIC.value,
                                                   Filters.IN_LABEL.value.format(args.jira_label) + " " + Filters.IN_LABEL.value.format(args.jira_extra_label) if args.jira_extra_label else "",
-                                                  Filters.IN_FLIGHT.value,
-                                                  Filters.CREATED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
+                                                                    Filters.IN_FLIGHT.value,
+                                                                    Filters.CREATED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
     total_issues_in_flight_after_date = run_jql(jira, total_issues_in_flight_after_date_jql)
     aggregates['total_issues_in_flight_after_date'] = {'length': len(total_issues_in_flight_after_date), 'jql': total_issues_in_flight_after_date_jql}
 
     # TOTAL ISSUES CREATED BETWEEN DATES IN DEPENDENCY
-    total_issues_created_between_dates_in_dependency_jql = "{} {} {} {} {} {}".format(JQLs.JQL_PROJECT.value.format(args.jira_project),
+    total_issues_created_between_dates_in_dependency_jql = "{} {} {} {} {} {}".format(Filters.PROJECT.value.format(args.jira_project),
                                                   Filters.NOT_TYPE_EPIC.value,
                                                   Filters.IN_LABEL.value.format(args.jira_label) + " " + Filters.IN_LABEL.value.format(args.jira_extra_label) if args.jira_extra_label else "",
                                                   Filters.IN_LABEL.value.format("Dependency"),
@@ -131,7 +131,7 @@ def exec(args):
     aggregates['total_issues_created_between_dates_in_dependency'] = {'length': len(total_issues_created_between_dates_in_dependency), 'jql': total_issues_created_between_dates_in_dependency_jql}
 
     # TOTAL ISSUES RELEASED BETWEEN DATES IN DEPENDENCY
-    total_issues_released_between_dates_in_dependency_jql = "{} {} {} {} {} {}".format(JQLs.JQL_PROJECT.value.format(args.jira_project),
+    total_issues_released_between_dates_in_dependency_jql = "{} {} {} {} {} {}".format(Filters.PROJECT.value.format(args.jira_project),
                                                   Filters.NOT_TYPE_EPIC.value,
                                                   Filters.IN_LABEL.value.format(args.jira_label) + " " + Filters.IN_LABEL.value.format(args.jira_extra_label) if args.jira_extra_label else "",
                                                   Filters.IN_LABEL.value.format("Dependency"),
@@ -141,7 +141,7 @@ def exec(args):
     aggregates['total_issues_released_between_dates_in_dependency'] = {'length': len(total_issues_released_between_dates_in_dependency), 'jql': total_issues_released_between_dates_in_dependency_jql}
 
     # TOTAL ISSUES REJECTED BETWEEN DATES IN DEPENDENCY
-    total_issues_rejected_between_dates_in_dependency_jql = "{} {} {} {} {} {}".format(JQLs.JQL_PROJECT.value.format(args.jira_project),
+    total_issues_rejected_between_dates_in_dependency_jql = "{} {} {} {} {} {}".format(Filters.PROJECT.value.format(args.jira_project),
                                                   Filters.NOT_TYPE_EPIC.value,
                                                   Filters.IN_LABEL.value.format(args.jira_label) + " " + Filters.IN_LABEL.value.format(args.jira_extra_label) if args.jira_extra_label else "",
                                                   Filters.IN_LABEL.value.format("Dependency"),
@@ -151,12 +151,12 @@ def exec(args):
     aggregates['total_issues_rejected_between_dates_in_dependency'] = {'length': len(total_issues_rejected_between_dates_in_dependency), 'jql': total_issues_rejected_between_dates_in_dependency_jql}
 
     # TOTAL ISSUES IN FLIGHT BETWEEN DATES IN DEPENDENCY
-    total_issues_in_flight_after_date_in_dependency_jql = "{} {} {} {} {} {}".format(JQLs.JQL_PROJECT.value.format(args.jira_project),
-                                                  Filters.NOT_TYPE_EPIC.value,
+    total_issues_in_flight_after_date_in_dependency_jql = "{} {} {} {} {} {}".format(Filters.PROJECT.value.format(args.jira_project),
+                                                                                     Filters.NOT_TYPE_EPIC.value,
                                                   Filters.IN_LABEL.value.format(args.jira_label) + " " + Filters.IN_LABEL.value.format(args.jira_extra_label) if args.jira_extra_label else "",
-                                                  Filters.IN_LABEL.value.format("Dependency"),
-                                                  Filters.IN_FLIGHT.value,
-                                                  Filters.CREATED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
+                                                                                     Filters.IN_LABEL.value.format("Dependency"),
+                                                                                     Filters.IN_FLIGHT.value,
+                                                                                     Filters.CREATED_DATES_FROM_TO.value.format(args.date_from, args.date_to))
     total_issues_in_flight_after_date_in_dependency = run_jql(jira, total_issues_in_flight_after_date_in_dependency_jql)
     aggregates['total_issues_in_flight_after_date_in_dependency'] = {'length': len(total_issues_in_flight_after_date_in_dependency), 'jql': total_issues_in_flight_after_date_in_dependency_jql}
     # ipdb.set_trace()

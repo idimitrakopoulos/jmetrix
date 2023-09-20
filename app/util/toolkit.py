@@ -7,7 +7,8 @@ import datetime
 from datetime import timezone, timedelta
 import traceback
 import re
-from util.jql import Status
+from util.jql import Status, Filters
+
 import ipdb
 
 # JIRA
@@ -437,12 +438,15 @@ def fancy_print_jql_info(aggregates, title=""):
 
         table.add_column("Label", justify="left", style="bright_yellow", no_wrap=True)
         table.add_column("JQL", justify="left", style="white")
+        table.add_column("Issue Keys", justify="left", style="white")
         table.add_column("Number of issues", justify="left", style="white", no_wrap=True)
+
 
         for aggregate in aggregates:
             # ipdb.set_trace()
             table.add_row(str(aggregate),
                           str(aggregates[aggregate]['jql']),
+                          str(aggregates[aggregate]['keys']),
                           str(aggregates[aggregate]['length']))
             table.add_section()
 
@@ -508,3 +512,22 @@ def simple_print_issue_keys(issues, title=""):
             result.append(issue.key)
 
         log.debug(', '.join(result))
+
+def prepare_jira_labels(input):
+    labels = input.split(";")
+    result = ""
+
+    for idx, label in enumerate(labels):
+        if label[0] == "!":
+            labels[idx] = Filters.NOT_IN_LABEL.value.format(label)
+        else:
+            labels[idx] = Filters.IN_LABEL.value.format(label)
+
+    return ' '.join(labels)
+
+def get_jira_issue_keys(issues):
+    result = []
+    if issues:
+        for issue in issues:
+            result.append(issue.key)
+    return ', '.join(result)

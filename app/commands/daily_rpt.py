@@ -1,6 +1,6 @@
 import logging
 log = logging.getLogger('root')
-from util.jql import JQLs, Filters, Status
+from util.jql import Filters, Status
 from util.toolkit import jira_token_authenticate, run_jql, fancy_print_issue_timings, get_time_in_current_status, \
     get_time_between_distant_statuses, group_issues_by_assignee, seconds_to_hours
 import ipdb, json
@@ -52,7 +52,7 @@ def exec(args):
     jira = jira_token_authenticate(args.jira_server_url, args.jira_auth_token)
 
     # Add project to JQL
-    jql_project = JQLs.JQL_PROJECT.value.format(args.jira_project)
+    jql_project = Filters.PROJECT.value.format(args.jira_project)
 
     # Delivery board
     jql_project_delivery_in_flight = "{} {}".format(jql_project, Filters.DELIVERY_IN_FLIGHT.value)

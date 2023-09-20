@@ -6,7 +6,11 @@ class StrValueEnum(Enum):
 
 class IssueType(StrValueEnum):
     STORY = 'Story'
+    STORY_BUG = 'Story Bug'
+    TASK = 'Task'
     BUG = 'Bug'
+    EPIC = 'Epic'
+    SPIKE = 'Spike'
 
 class TimeValue(StrValueEnum):
     MINUS_1_WEEK = '-1w'
@@ -41,13 +45,32 @@ class Status(StrValueEnum):
     CLOSED = 'Closed'
 
 class Filters(StrValueEnum):
+    PROJECT = "project = '{}'"
+
+    # Time
     CREATED_DATES_FROM_TO = "AND created >= '{} 00:00' AND created <= '{} 23:59'"
+    CREATED_DATETIME_FROM_TO = "AND created >= '{}' AND created <= '{}'"
     NOT_CREATED_DATES_FROM_TO = "AND NOT created >= '{} 00:00'"
     RESOLVED_DATES_FROM_TO = "AND resolved >= '{} 00:00' AND resolved <= '{} 23:59'"
+    UPDATED_DATETIME_FROM_TO = "AND updated >= '{}' AND updated <= '{}'"
+
+    # Epic
+    IN_EPIC_LINK = "AND 'Epic Link' IN ({})"
+    EPIC_LINK_IS_EMPTY = "AND 'Epic Link' IS EMPTY"
+    EPIC_LINK_IS_NOT_EMPTY = "AND 'Epic Link' IS NOT EMPTY"
+    # NOT_TYPE_EPIC = "AND issuetype NOT IN ('Epic')"
+
+    # Labels
     IN_LABEL = "AND labels IN ({})"
     NOT_IN_LABEL = "AND labels NOT IN ({})"
     IN_DEPENDENCY_LABEL = "AND labels IN ('Dependency')"
-    NOT_TYPE_EPIC = "AND issuetype NOT IN ('Epic')"
+
+    # Issuetype
+    IN_ISSUETYPE = "AND issuetype IN ({})"
+    NOT_IN_ISSUETYPE = "AND issuetype NOT IN ({})"
+
+
+    # Loaded filters
     RELEASED = "AND status IN (Done, Closed) AND Resolution NOT IN (Rejected)"
     REJECTED = "AND status IN (Done, Closed) AND Resolution IN (Rejected)"
     IN_FLIGHT = "AND status NOT IN (Done, Closed)"
@@ -56,8 +79,6 @@ class Filters(StrValueEnum):
     DELIVERY_IN_FLIGHT = "AND status IN ('In Progress', 'Ready for Code Review', 'In Code Review', " \
                          "'Ready for Testing', 'In Testing', 'Ready for Sign Off')"
 
-class JQLs(StrValueEnum):
-    JQL_PROJECT = "project = '{}'"
 
 
 #
