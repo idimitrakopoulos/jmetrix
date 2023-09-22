@@ -134,7 +134,6 @@ def exec(args):
 
 
 
-
         # Print in nice table
         fancy_print_jql_info(week_aggregates, f"Week from {project_week[0].strftime('%Y-%m-%d %H:%M')} to {project_week[1].strftime('%Y-%m-%d %H:%M')}")
         fancy_print_issue_history(total_updated_issues_within_period, f"Changes from {project_week[0].strftime('%Y-%m-%d %H:%M')} to {project_week[1].strftime('%Y-%m-%d %H:%M')}")
