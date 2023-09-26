@@ -25,7 +25,7 @@ def jira_authenticate(url, u, p):
 def jira_token_authenticate(url, t):
     try:
         log.debug("Attempting to authenticate to '" + url + "' (token: ---)")
-        j = JIRA(server=url, token_auth=t)
+        j = JIRA(server=url, token_auth=t, options={'verify': False})
         log.debug("Successful authentication!")
     except:
         log.error("Error when trying to authenticate to '" + url + "' (token: ---)")
@@ -360,7 +360,7 @@ def fancy_print_issue_summary(issues, title=""):
 
 
 
-def fancy_print_issue_history(issues, title=""):
+def fancy_print_issue_history(issues, title="", from_to_date=None):
     if issues:
         from rich.console import Console
         from rich.table import Table
@@ -368,6 +368,7 @@ def fancy_print_issue_history(issues, title=""):
         table = Table(title=title)
 
         table.add_column("Key", justify="left", style="bright_yellow", no_wrap=True)
+        table.add_column("Epic", justify="left", style="bright_cyan", no_wrap=True)
         table.add_column("User", justify="left", style="white", no_wrap=True)
         table.add_column("Date", justify="left", style="white", no_wrap=True)
         table.add_column("Type", justify="left", style="white")
@@ -379,9 +380,9 @@ def fancy_print_issue_history(issues, title=""):
             for history in issue.changelog.histories:
                 for item in history.items:
                     if item.field == 'status' or item.field == 'summary' or item.field == 'type' or item.field == 'labels':
-                        table.add_row(issue.key, history.author.displayName, str(parse(history.created).date()), item.field, item.fromString, item.toString)
+                        table.add_row(issue.key, issue.fields.customfield_13520, history.author.displayName, str(parse(history.created).date()), item.field, item.fromString, item.toString)
                     elif (item.field == 'Acceptance Criteria'):
-                        table.add_row(issue.key, history.author.displayName, str(parse(history.created).date()), item.field, "***", "***")
+                        table.add_row(issue.key, issue.fields.customfield_13520, history.author.displayName, str(parse(history.created).date()), item.field, "***", "***")
                     # else:
                     #     print(item.field)
             table.add_section()
@@ -531,3 +532,19 @@ def get_jira_issue_keys(issues):
         for issue in issues:
             result.append(issue.key)
     return ', '.join(result)
+
+def get_jira_issue_and_epic_keys(issues):
+    from collections import defaultdict
+    result = ""
+    key_array = []
+    if issues:
+        for issue in issues:
+            key_array.append([issue.key, issue.fields.customfield_13520])
+
+    grouped_strings = defaultdict(list)
+    for item, group in key_array:
+        grouped_strings[group].append(item)
+    for group, items in grouped_strings.items():
+        result += f"{group}: {' '.join(items)}\n"
+
+    return result

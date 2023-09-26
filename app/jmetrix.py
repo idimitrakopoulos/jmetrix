@@ -66,6 +66,7 @@ if __name__ == '__main__':
     burnup_required_args.add_argument('-L', '--lvl2_labels', dest='jira_lvl2_labels', type=str, help='Jira labels in comma separated string will be joined and any labels separated with colon will be split. For example "label1,label2;label3", you can use ! before each field to negate them', required=True)
     burnup_optional_args = burnup_parser.add_argument_group('optional arguments')
     burnup_optional_args.add_argument('-T', '--to', dest='date_to', type=str, help='The date up to which to search in the format of yyyy-mm-dd')
+    burnup_optional_args.add_argument('-c', '--changes', action='store_true', help='See issue changes')
     burnup_optional_args.add_argument('-V', '--verbose', action='store_true', help='Run script in Verbose mode')
 
     # Parse arguments
