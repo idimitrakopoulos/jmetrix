@@ -35,9 +35,10 @@ def exec(args):
     table.add_column("Test", justify="left", style="white")
 
     issues = dict()
+    print('key;type;labels;original_estimate;created;updated;t_backlog;t_ready_for_analysis;t_in_analysis;t_ready_for_uxd;t_in_uxd;t_ready_for_tech_review;t_in_tech_review;t_ready_for_refinement;t_in_refinement;t_ready_for_delivery;t_ready_to_start;t_in_progress;t_ready_for_code_review;t_in_code_review;t_ready_for_testing;t_in_testing;t_ready_for_sign_off;t_done;t_current_status;t_overall;lead_time;cycle_time')
 
     for issue in jql_results:
-        print('{}: {}'.format(jira.server_url + "/browse/"+ issue.key, issue.fields.summary))
+        log.debug('{}: {}'.format(jira.server_url + "/browse/"+ issue.key, issue.fields.summary))
         values = dict()
         issues[issue.key] = values
 
@@ -51,6 +52,10 @@ def exec(args):
         issues[issue.key]['fields']['type'] = issue.fields.issuetype.name
         issues[issue.key]['fields']['labels'] = issue.fields.labels
         issues[issue.key]['fields']['original_estimate'] = issue.fields.timeoriginalestimate
+        issues[issue.key]['fields']['created'] = issue.fields.created
+        issues[issue.key]['fields']['updated'] = issue.fields.updated
+
+
 
         issues[issue.key]['t_backlog'] = get_time_in_initial_status(Status.BACKLOG.value, issue.changelog, issue.fields.created)
         issues[issue.key]['t_ready_for_analysis'] = get_time_in_status(Status.READY_FOR_ANALYSIS.value, issue.changelog)
@@ -128,8 +133,40 @@ def exec(args):
         else:
             table.add_row(issue.key, issues[issue.key]['fields']['status'], "n/a",  "-%", "-%", "-%", "-%", "-%")
 
-
-        log.debug(json.dumps(issues[issue.key], indent=4))
+        if args.csv:
+            # ipdb.set_trace()
+            print("{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};{};".format(
+                                        issues[issue.key]['key'],
+                                        issues[issue.key]['fields']['type'],
+                                        ','.join(issues[issue.key]['fields']['labels']),
+                                        issues[issue.key]['fields']['original_estimate'],
+                                        issues[issue.key]['fields']['created'],
+                                        issues[issue.key]['fields']['updated'],
+                                        issues[issue.key]['t_backlog']['worktime'],
+                                        issues[issue.key]['t_ready_for_analysis']['worktime'],
+                                        issues[issue.key]['t_in_analysis']['worktime'],
+                                        issues[issue.key]['t_ready_for_uxd']['worktime'],
+                                        issues[issue.key]['t_in_uxd']['worktime'],
+                                        issues[issue.key]['t_ready_for_tech_review']['worktime'],
+                                        issues[issue.key]['t_in_tech_review']['worktime'],
+                                        issues[issue.key]['t_ready_for_refinement']['worktime'],
+                                        issues[issue.key]['t_in_refinement']['worktime'],
+                                        issues[issue.key]['t_ready_for_delivery']['worktime'],
+                                        issues[issue.key]['t_ready_to_start']['worktime'],
+                                        issues[issue.key]['t_in_progress']['worktime'],
+                                        issues[issue.key]['t_ready_for_code_review']['worktime'],
+                                        issues[issue.key]['t_in_code_review']['worktime'],
+                                        issues[issue.key]['t_ready_for_testing']['worktime'],
+                                        issues[issue.key]['t_in_testing']['worktime'],
+                                        issues[issue.key]['t_ready_for_sign_off']['worktime'],
+                                        issues[issue.key]['t_done']['worktime'],
+                                        issues[issue.key]['t_current_status']['worktime'],
+                                        issues[issue.key]['t_overall']['worktime'],
+                                        issues[issue.key]['aggregates']['t_lead']['worktime'],
+                                        issues[issue.key]['aggregates']['t_cycle']['worktime']
+                                              ))
+        else:
+            log.debug(json.dumps(issues[issue.key], indent=4))
 
     max_t_lead = sorted(issues.items(), key=lambda kv: kv[1]['aggregates']['t_lead']['duration'], reverse=True)
     max_t_cycle = sorted(issues.items(), key=lambda kv: kv[1]['aggregates']['t_cycle']['duration'], reverse=True)
@@ -141,7 +178,7 @@ def exec(args):
     # print("------------------------------------------------")
     # log.debug(json.dumps(min_sizing_accuracy_pct, indent=4))
 
-
-    console = Console()
-    console.print(table)
+    if not args.csv:
+        console = Console()
+        console.print(table)
 

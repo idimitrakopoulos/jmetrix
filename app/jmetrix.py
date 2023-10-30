@@ -26,6 +26,7 @@ if __name__ == '__main__':
     inspect_required_args.add_argument('-t', '--token', dest='jira_auth_token', type=str, help='The Jira authentication token', required=True)
     inspect_required_args.add_argument('-j', '--jql', dest='jira_jql', type=str, help='The JQL query you want to get metrics for.', required=True)
     inspect_optional_args = inspect_parser.add_argument_group('optional arguments')
+    inspect_optional_args.add_argument('-C', '--csv', action='store_true', help='Output CSV mode')
     inspect_optional_args.add_argument('-V', '--verbose', action='store_true', help='Run script in Verbose mode')
 
     # Swimlane report
