@@ -8,6 +8,7 @@ from util.toolkit import jira_token_authenticate, get_time_in_status, get_time_f
     get_time_between_extreme_statuses, get_time_in_initial_status, get_time_in_current_status, run_jql, \
     get_time_from_creation_to_now, seconds_to_hours, add_worktimes_and_durations
 
+
 def exec(args):
 
     # Connect to Jira instance
